@@ -12,8 +12,9 @@ export const CreateCampaignSchema = z.object({
   fundraiserId: z.uuidv7(),
 });
 
-export type createCampaignDTO = z.infer<typeof CreateCampaignSchema>;
-
 export const CampaignIdParamSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid({ version: "v7" }),
 });
+
+export type createCampaignDTO = z.infer<typeof CreateCampaignSchema>;
+export type campaignIdDTO = z.infer<typeof CampaignIdParamSchema>;
