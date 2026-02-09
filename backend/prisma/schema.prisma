@@ -31,7 +31,7 @@ model User {
   name               String
   email              String     @unique
   role               UserRole   @default(DONOR)
-  verificationStatus Boolean    @default(false) @map("verification_statusa")
+  verificationStatus Boolean    @default(false) @map("verification_status")
   createdAt          DateTime   @default(now()) @map("created_at")
   campaigns          Campaign[]
   donations          Donation[]
@@ -40,17 +40,17 @@ model User {
 }
 
 model Campaign {
-  id            String         @id @default(uuid(7))
-  title         String
-  description   String?
-  type          String //→ donation | crowdfunding
-  goal_amount   Decimal        @map("goal_amount")
-  raised_amount Decimal        @map("raised_amount")
-  start_date    DateTime       @map("start_date")
-  end_date      DateTime       @map("end_date")
-  status        CampaignStatus @default(DRAFT)
-  category      String
-  created_at    DateTime       @default(now()) @map("created_at")
+  id           String         @id @default(uuid(7))
+  title        String
+  description  String?
+  type         String //→ donation | crowdfunding
+  goalAmount   Decimal        @map("goal_amount")
+  raisedAmount Decimal        @map("raised_amount")
+  startDate    DateTime       @map("start_date")
+  endDate      DateTime       @map("end_date")
+  status       CampaignStatus @default(DRAFT)
+  category     String
+  createdAt    DateTime       @default(now()) @map("created_at")
 
   user         User       @relation(fields: [fundraiserId], references: [id])
   fundraiserId String     @map("fundraiser_id")
