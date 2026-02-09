@@ -6,3 +6,75 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  DONOR
+  FUND_RAISER
+  ADMIN
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum DonationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id                 String     @id @default(uuid(7))
+  name               String
+  email              String     @unique
+  role               UserRole   @default(DONOR)
+  verificationStatus Boolean    @default(false) @map("verification_statusa")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  campaigns          Campaign[]
+  donations          Donation[]
+
+  @@map("users")
+}
+
+model Campaign {
+  id            String         @id @default(uuid(7))
+  title         String
+  description   String?
+  type          String //→ donation | crowdfunding
+  goal_amount   Decimal        @map("goal_amount")
+  raised_amount Decimal        @map("raised_amount")
+  start_date    DateTime       @map("start_date")
+  end_date      DateTime       @map("end_date")
+  status        CampaignStatus @default(DRAFT)
+  category      String
+  created_at    DateTime       @default(now()) @map("created_at")
+
+  user         User       @relation(fields: [fundraiserId], references: [id])
+  fundraiserId String     @map("fundraiser_id")
+  donations    Donation[]
+
+  @@map("campaigns")
+}
+
+model Donation {
+  id         String @id @default(uuid())
+  campaignId String @map("campaign_id")
+  donorId    String
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  donor    User     @relation(fields: [donorId], references: [id])
+
+  amount Decimal
+  status DonationStatus @default(PENDING)
+
+  transactionId String? @unique @map("transaction_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([campaignId])
+  @@index([donorId])
+  @@map("donations")
+}
