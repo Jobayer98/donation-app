@@ -8,7 +8,7 @@ type tokenPayload = {
 export function generateAccessToken(payload: tokenPayload): string {
   const token = jwt.sign({ ...payload }, "mysecret", {
     algorithm: "HS256",
-    expiresIn: "5m",
+    expiresIn: "1d",
   });
 
   return token;
@@ -16,9 +16,12 @@ export function generateAccessToken(payload: tokenPayload): string {
 
 export function verifyToken(token: string) {
   try {
-    const decoded = jwt.verify(token, "mysecret");
-    console.log(decoded);
+    const decoded = jwt.verify(token, "mysecret") as {
+      id: string;
+      role: string;
+    };
+    return decoded;
   } catch (error) {
-    console.log("Error verify token", error);
+    throw new Error("Token expired/invalid");
   }
 }

@@ -9,14 +9,20 @@ import {
 } from "../controllers/campaign.controller";
 import { validateBody } from "../middlewares/validate.middleware";
 import { CreateCampaignSchema } from "../schema/campaign.schema";
+import { isAuthenticated } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.post("/campaigns", validateBody(CreateCampaignSchema), createCampaign);
-router.get("/campaigns", findAllCampaign);
-router.get("/campaigns/:id", findOneCampaign);
-router.patch("/campaigns/:id", updateCampaign);
-router.patch("/campaign/:id/publish", publishCampaign);
-router.patch("/campaign/:id/close", closeCampaign);
+router.post(
+  "/campaigns",
+  isAuthenticated,
+  validateBody(CreateCampaignSchema),
+  createCampaign,
+);
+router.get("/campaigns", isAuthenticated, findAllCampaign);
+router.get("/campaigns/:id", isAuthenticated, findOneCampaign);
+router.patch("/campaigns/:id", isAuthenticated, updateCampaign);
+router.patch("/campaign/:id/publish", isAuthenticated, publishCampaign);
+router.patch("/campaign/:id/close", isAuthenticated, closeCampaign);
 
 export default router;

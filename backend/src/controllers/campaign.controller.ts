@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { createCampaignDTO } from "../schema/campaign.schema";
+import { success } from "zod";
 
 export async function createCampaign(req: Request, res: Response) {
   try {
@@ -15,12 +16,13 @@ export async function createCampaign(req: Request, res: Response) {
         endDate: data.endDate,
         raisedAmount: 0,
         type: data.type,
-        status: data.status,
-        fundraiserId: "ccaca9ea-0761-4dff-8049-5f65c9a8b86e",
+        fundraiserId: req.user!.id,
       },
     });
 
     res.status(201).json({
+      success: true,
+      message: "Campaign created successfully",
       data: campaign,
     });
   } catch (error) {
@@ -34,29 +36,38 @@ export async function findAllCampaign(req: Request, res: Response) {
     let data = await prisma.campaign.findMany();
 
     res.json({
+      success: true,
+      message: "Campaigns retrieved successfully",
       data,
     });
   } catch (error) {
-    console.log(error);
-    res.json({ error: error });
+    res.json({
+      success: true,
+      message: "Failed to retrive campaign data",
+      error: error,
+    });
   }
 }
 
 export async function findOneCampaign(req: Request, res: Response) {
   try {
-    let id = "019c41c2-f1dd-74e5-9b16-cdc000a7382a";
     let data = await prisma.campaign.findUnique({
       where: {
-        id: id,
+        id: String(req.params.id),
       },
     });
 
     res.json({
+      success: true,
+      message: "Campaign retrieved successfully",
       data,
     });
   } catch (error) {
-    console.log(error);
-    res.json({ error: error });
+    res.json({
+      success: true,
+      message: "Failed to retrive campaign data",
+      error: error,
+    });
   }
 }
 

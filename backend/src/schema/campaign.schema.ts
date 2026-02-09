@@ -7,9 +7,7 @@ export const CreateCampaignSchema = z.object({
   goalAmount: z.number().positive(),
   startDate: z.iso.datetime(),
   endDate: z.iso.datetime(),
-  status: z.literal("DRAFT"),
   category: z.string(),
-  fundraiserId: z.uuidv7(),
 });
 
 export const CampaignIdParamSchema = z.object({
