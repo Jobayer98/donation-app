@@ -14,5 +14,8 @@ export const CampaignIdParamSchema = z.object({
   id: z.uuid({ version: "v7" }),
 });
 
+export const CampaignStatusSchema = z.enum(["DRAFT", "ACTIVE", "PAUSED", "COMPLETED"]);
+
 export type createCampaignDTO = z.infer<typeof CreateCampaignSchema>;
 export type campaignIdDTO = z.infer<typeof CampaignIdParamSchema>;
+export type campaignStatusDTO = z.infer<typeof CampaignStatusSchema>;

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
-import { createCampaignDTO } from "../schema/campaign.schema";
-import { success } from "zod";
+import { campaignStatusDTO, createCampaignDTO } from "../schema/campaign.schema";
+
 
 export async function createCampaign(req: Request, res: Response) {
   try {
@@ -31,9 +31,38 @@ export async function createCampaign(req: Request, res: Response) {
   }
 }
 
-export async function findAllCampaign(req: Request, res: Response) {
+export async function findActiveCampaign(req: Request, res: Response) {
   try {
-    let data = await prisma.campaign.findMany();
+    let data = await prisma.campaign.findMany({
+      where: {
+        status: "ACTIVE",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Campaigns retrieved successfully",
+      data,
+    });
+  } catch (error) {
+    res.json({
+      success: true,
+      message: "Failed to retrive campaign data",
+      error: error,
+    });
+  }
+}
+
+export async function findAllCampaign(req: Request, res: Response) {
+  let { page = 1, limit = 10, status = undefined } = req.query;
+  try {
+    let data = await prisma.campaign.findMany({
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
+      where: {
+        status: status ? status as campaignStatusDTO : undefined,
+      },
+    });
 
     res.json({
       success: true,
@@ -71,25 +100,64 @@ export async function findOneCampaign(req: Request, res: Response) {
   }
 }
 
-export function updateCampaign(req: Request, res: Response) {
+export async function updateCampaign(req: Request, res: Response) {
   try {
-    res.send("update campaign");
+    let data = await prisma.campaign.update({
+      where: {
+        id: String(req.params.id),
+      },
+      data: req.body,
+    });
+
+    res.json({
+      success: true,
+      message: "Campaign updated successfully",
+      data,
+    });
   } catch (error) {
     console.log(error);
     res.json({ error: error });
   }
 }
-export function publishCampaign(req: Request, res: Response) {
+
+export async function publishCampaign(req: Request, res: Response) {
   try {
-    res.send("update campaign");
+    let data = await prisma.campaign.update({
+      where: {
+        id: String(req.params.id),
+      },
+      data: {
+        status: "ACTIVE",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Campaign published successfully",
+      data,
+    });
   } catch (error) {
     console.log(error);
     res.json({ error: error });
   }
 }
-export function closeCampaign(req: Request, res: Response) {
+
+export async function closeCampaign(req: Request, res: Response) {
   try {
-    res.send("update campaign");
+    let data = await prisma.campaign.update({
+      where: {
+        id: String(req.params.id),
+      },
+      data: {
+        status: "PAUSED",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Campaign closed successfully",
+      data,
+    });
   } catch (error) {
     console.log(error);
     res.json({ error: error });
