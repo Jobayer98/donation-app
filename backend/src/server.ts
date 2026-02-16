@@ -1,11 +1,12 @@
 import express from "express";
-import { authRoute, campaignRoute } from "./routes";
+import { authRoute, campaignRoute, donationRoute } from "./routes";
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
+app.use(donationRoute);
 app.use(authRoute);
 app.use(campaignRoute);
 

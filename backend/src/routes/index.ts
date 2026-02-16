@@ -2,4 +2,6 @@ import campaignRoute from "./campaign.routes";
 
 import authRoute from "./auth.route";
 
-export { campaignRoute, authRoute };
+import donationRoute from "./donation.route";
+
+export { campaignRoute, authRoute, donationRoute };

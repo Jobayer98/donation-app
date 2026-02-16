@@ -63,6 +63,9 @@ export const findOneCampaign = asyncHandler(async (req: Request, res: Response) 
     where: {
       id: String(req.params.id),
     },
+    include: {
+      donations: true
+    }
   });
 
   res.json({
