@@ -61,19 +61,18 @@ model Campaign {
 }
 
 model Donation {
-  id         String @id @default(uuid())
-  campaignId String @map("campaign_id")
-  donorId    String
+  id         String  @id @default(uuid())
+  campaignId String  @map("campaign_id")
+  donorId    String? @map("donor_id")
+
+  amount        Decimal
+  status        DonationStatus @default(PENDING)
+  isAnonymous   Boolean        @default(false)
+  transactionId String?        @unique @map("transaction_id")
+  createdAt     DateTime       @default(now()) @map("created_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id])
-  donor    User     @relation(fields: [donorId], references: [id])
-
-  amount Decimal
-  status DonationStatus @default(PENDING)
-
-  transactionId String? @unique @map("transaction_id")
-
-  createdAt DateTime @default(now()) @map("created_at")
+  donor    User?    @relation(fields: [donorId], references: [id])
 
   @@index([campaignId])
   @@index([donorId])
