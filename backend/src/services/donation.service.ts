@@ -82,6 +82,7 @@ class DonationService {
     return prisma.campaign.update({
       where: { id: campaignId },
       data: { raisedAmount: { increment: amount } },
+      select: { fundraiserId: true },
     });
   }
 }

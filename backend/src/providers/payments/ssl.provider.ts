@@ -3,6 +3,7 @@ import { sslcommerzConfig, appConfig } from "../../lib/config";
 import { PaymentInfo } from "../../types/payment.type";
 import { IPaymentProvider } from "./base.provider";
 import donationService from "../../services/donation.service";
+import paymentLogService from "../../services/paymentLog.service";
 
 class SSLCommerzProvider implements IPaymentProvider {
     async createPayment(paymentInfo: PaymentInfo) {
@@ -34,7 +35,8 @@ class SSLCommerzProvider implements IPaymentProvider {
         const donation = await donationService.updateStatus(transactionId, status);
 
         if (status === 'SUCCESS') {
-            await donationService.incrementCampaignAmount(donation.campaignId, Number(donation.amount));
+            const campaign = await donationService.incrementCampaignAmount(donation.campaignId, Number(donation.amount));
+            await paymentLogService.create(response.data, campaign.fundraiserId);
         }
     }
 }
