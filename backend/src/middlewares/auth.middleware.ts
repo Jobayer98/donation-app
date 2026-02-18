@@ -32,8 +32,6 @@ export function isAuthenticated(
       return res.status(401).json({ message: "Access denied. Invalid Token." });
     }
 
-    // decoded.
-
     const decoded = verifyToken(token);
 
     req.user = {
@@ -46,4 +44,18 @@ export function isAuthenticated(
     console.log(error);
     res.status(401).json({ message: "Authentication failed" });
   }
+}
+
+export function authorize(...roles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+    }
+
+    next();
+  };
 }

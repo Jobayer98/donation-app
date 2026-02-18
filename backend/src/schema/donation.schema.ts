@@ -1,21 +1,11 @@
 import { z } from "zod";
 
 export const DonationSchema = z.object({
-    campaignId: z.string(),
-    donorId: z.string().optional(),
-    amount: z.number(),
-    status: z.enum(["PENDING", "SUCCESS", "FAILED"]).default("PENDING"),
+    campaignId: z.string().min(1, "Campaign ID is required"),
+    amount: z.number().positive("Amount must be positive").min(1, "Minimum donation is 1"),
     isAnonymous: z.boolean().default(false),
-    transactionId: z.string().optional(),
-    provider: z.string(),
-    currency: z.string(),
-});
-
-export const UpdateDonationSchema = z.object({
-    id: z.string(),
-    status: z.enum(["PENDING", "SUCCESS", "FAILED"]).default("PENDING"),
-    transactionId: z.string().optional(),
+    provider: z.enum(["sslcommerz", "stripe", "bkash"], { message: "Invalid payment provider" }),
+    currency: z.string().length(3, "Currency must be 3 characters (e.g., BDT, USD)").toUpperCase(),
 });
 
 export type DonationDTO = z.infer<typeof DonationSchema>;
-export type UpdateDonationDTO = z.infer<typeof UpdateDonationSchema>;

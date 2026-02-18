@@ -12,10 +12,10 @@ class SSLCommerzProvider implements IPaymentProvider {
             total_amount: paymentInfo.amount.toString(),
             currency: paymentInfo.currency,
             tran_id: paymentInfo.transactionId!,
-            success_url: `${appConfig.base_url}/payment/success`,
-            fail_url: `${appConfig.base_url}/payment/fail`,
-            cancel_url: `${appConfig.base_url}/payment/cancel`,
-            ipn_url: `${appConfig.base_url}/payment/ipn`,
+            success_url: `${appConfig.base_url}/api/payments/success`,
+            fail_url: `${appConfig.base_url}/api/payments/fail`,
+            cancel_url: `${appConfig.base_url}/api/payments/cancel`,
+            ipn_url: `${appConfig.base_url}/api/payments/ipn`,
             cus_name: paymentInfo.customer?.name ?? "Customer Name",
             cus_email: paymentInfo.customer?.email ?? "customer@example.com"
         });

@@ -20,6 +20,6 @@ app.get("/failed", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/failed.html"));
 });
 
-app.use(apiRoute);
+app.use("/api", apiRoute);
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));

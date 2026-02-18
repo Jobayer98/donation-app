@@ -31,7 +31,7 @@ model User {
   name               String
   email              String            @unique
   password           String
-  role               UserRole          @default(FUND_RAISER)
+  role               UserRole          @default(DONOR)
   verificationStatus Boolean           @default(false) @map("verification_status")
   createdAt          DateTime          @default(now()) @map("created_at")
   campaigns          Campaign[]

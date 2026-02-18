@@ -6,8 +6,10 @@ import { formatDonation } from "../utils/donation-format";
 
 export const createDonationIntent = asyncHandler(
   async (req: Request, res: Response) => {
-    const { campaignId, amount, isAnonymous, provider, currency } = req.body;
+    let { campaignId, amount, isAnonymous, provider, currency } = req.body;
     const donorId = req.user?.id;
+
+    isAnonymous = isAnonymous === undefined || isAnonymous === true ? true : false;
 
     const donation = await donationService.createIntent(
       campaignId,
@@ -26,7 +28,7 @@ export const createDonationIntent = asyncHandler(
 
     res.json({
       success: true,
-      data: { paymentSession, donation },
+      data: { ...paymentSession },
     });
   },
 );
