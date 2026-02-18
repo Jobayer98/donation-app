@@ -11,7 +11,8 @@ export const PaymentSchema = z.object({
 })
 
 export const PaymentSuccessSchema = z.object({
-    provider: z.enum(['sslcommerz', 'stripe', 'bkash']),
+    transactionId: z.string(),
+    provider: z.string(),
     val_id: z.string()
 })
 

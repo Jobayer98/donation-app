@@ -1,21 +1,21 @@
 import { z } from "zod";
 
-const donationSchema = z.object({
+export const DonationSchema = z.object({
     campaignId: z.string(),
     donorId: z.string().optional(),
     amount: z.number(),
     status: z.enum(["PENDING", "SUCCESS", "FAILED"]).default("PENDING"),
     isAnonymous: z.boolean().default(false),
     transactionId: z.string().optional(),
-    createdAt: z.date().optional(),
+    provider: z.string(),
+    currency: z.string(),
 });
 
-const updateDonationSchema = z.object({
+export const UpdateDonationSchema = z.object({
     id: z.string(),
     status: z.enum(["PENDING", "SUCCESS", "FAILED"]).default("PENDING"),
     transactionId: z.string().optional(),
-    createdAt: z.date().optional(),
 });
 
-export type DonationDTO = z.infer<typeof donationSchema>;
-export type UpdateDonationDTO = z.infer<typeof updateDonationSchema>;
+export type DonationDTO = z.infer<typeof DonationSchema>;
+export type UpdateDonationDTO = z.infer<typeof UpdateDonationSchema>;

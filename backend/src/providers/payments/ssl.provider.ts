@@ -1,7 +1,7 @@
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
 import { sslcommerzConfig, appConfig } from "../../lib/config";
 import { PaymentInfo } from "../../types/payment.type";
+import { prisma } from "../../lib/prisma";
 
 
 
@@ -12,7 +12,7 @@ class SSLCommerzProvider {
             store_passwd: sslcommerzConfig.store_password,
             total_amount: paymentInfo.amount,
             currency: paymentInfo.currency,
-            tran_id: uuidv4(),
+            tran_id: paymentInfo.transactionId,
             success_url: `${appConfig.base_url}/payment/success`,
             fail_url: `${appConfig.base_url}/payment/fail`,
             cancel_url: `${appConfig.base_url}/payment/cancel`,
@@ -30,16 +30,31 @@ class SSLCommerzProvider {
         return { url: response.data.GatewayPageURL }
     }
 
-    async validatePayment(val_id: string) {
+    async validatePayment(val_id: string, transactionId: string) {
         const response = await axios.get(`https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${sslcommerzConfig.store_id}&store_passwd=${sslcommerzConfig.store_password}`);
 
         const data = response.data
 
-        if (data.status !== 'VALID') {
-            return false
-        }
+        if (data.status === 'VALID') {
+            await prisma.donation.update({
+                where: {
+                    transactionId,
+                },
+                data: {
+                    status: 'SUCCESS',
+                },
+            })
+        } else {
 
-        return true
+            await prisma.donation.update({
+                where: {
+                    transactionId,
+                },
+                data: {
+                    status: 'FAILED',
+                },
+            })
+        }
     }
 }
 

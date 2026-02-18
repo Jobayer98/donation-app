@@ -1,42 +1,33 @@
 import { getProvider } from "../providers/payments";
-import SSLCommerzProvider from "../providers/payments/ssl.provider";
-import { PaymentDTO, PaymentSuccessDTO } from "../schema/payment.schema";
+import { PaymentSuccessDTO } from "../schema/payment.schema";
 
 class PaymentService {
-    async createPayment(payload: PaymentDTO) {
-        const provider = getProvider(payload.provider)
+    async createPayment(donationId: string, amount: number, transactionId: string, currency: string, providerName: string) {
+        const provider = getProvider(providerName)
 
         // create payment session
-        const session = await provider.createPayment({ amount: payload.amount, currency: payload.currency, customer: payload.customer })
+        const session = await provider.createPayment({ amount, transactionId, currency, customer: { id: donationId, name: '', email: '' } })
 
         return session
     }
 
     async handleSuccess(payload: PaymentSuccessDTO) {
-        // const provider = getProvider(payload.provider)
-        const provider = new SSLCommerzProvider();
+        const provider = getProvider(payload.provider)
 
-        await provider.validatePayment(payload.val_id)
+        await provider.validatePayment(payload.val_id, payload.transactionId)
 
-        return { status: 'success', message: 'Payment successful' }
     }
 
     async handleFail(payload: PaymentSuccessDTO) {
-        // const provider = getProvider(payload.provider)
-        const provider = new SSLCommerzProvider();
+        const provider = getProvider(payload.provider)
 
-        const result = await provider.validatePayment(payload.val_id)
-
-        return result
+        await provider.validatePayment(payload.val_id, payload.transactionId)
     }
 
     async handleCancel(payload: PaymentSuccessDTO) {
-        // const provider = getProvider(payload.provider)
-        const provider = new SSLCommerzProvider();
+        const provider = getProvider(payload.provider)
 
-        const result = await provider.validatePayment(payload.val_id)
-
-        return result
+        await provider.validatePayment(payload.val_id, payload.transactionId)
     }
 }
 
