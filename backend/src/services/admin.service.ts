@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma";
 import { campaignStatusDTO } from "../schema/campaign.schema";
+import { updateUserRoleDTO } from "../schema/user.schema";
 
 class AdminService {
     async getOverview(excludeUserId: string) {
@@ -43,6 +44,14 @@ class AdminService {
                 role: true,
                 campaigns: { select: { id: true, raisedAmount: true } }
             }
+        });
+    }
+
+    async updateUserRole(userId: string, data: updateUserRoleDTO) {
+        return prisma.user.update({
+            where: { id: userId },
+            data: { role: data.role },
+            select: { id: true, name: true, email: true, role: true }
         });
     }
 }

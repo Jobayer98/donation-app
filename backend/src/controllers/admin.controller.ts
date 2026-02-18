@@ -1,6 +1,7 @@
 import asyncHandler from "../utils/asyncHandler";
 import adminService from "../services/admin.service";
 import { campaignStatusDTO } from "../schema/campaign.schema";
+import { updateUserRoleDTO } from "../schema/user.schema";
 
 export const adminOverview = asyncHandler(async (req, res) => {
   const data = await adminService.getOverview(req.user!.id);
@@ -47,4 +48,11 @@ export const adminUsers = asyncHandler(async (req, res) => {
   }));
 
   return res.status(200).json({ success: true, data: formattedUsers });
+});
+
+export const updateUserRole = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const data: updateUserRoleDTO = req.body;
+  const user = await adminService.updateUserRole(id, data);
+  return res.status(200).json({ success: true, data: user });
 });
