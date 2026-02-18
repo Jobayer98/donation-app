@@ -3,6 +3,7 @@ import asyncHandler from "../utils/asyncHandler";
 import { Request, Response } from "express";
 import paymentService from "../services/payment.service";
 import { v4 as uuidv4 } from "uuid";
+import { formatDonation } from "../utils/donation-format";
 
 export const createDonationIntent = asyncHandler(async (req: Request, res: Response) => {
     const donorId = req.user?.id;
@@ -56,16 +57,28 @@ export const findDonationById = asyncHandler(async (req: Request, res: Response)
     });
 });
 
+// get donation history
 export const findMyDonations = asyncHandler(async (req: Request, res: Response) => {
     const donorId = req.user?.id;
-    const donations = await prisma.donation.findMany({
+    let donations = await prisma.donation.findMany({
         where: {
             donorId: String(donorId),
+            status: "SUCCESS",
+
         },
+        include: {
+            campaign: {
+                select: {
+                    title: true,
+
+                }
+            }
+        }
     });
+
     res.json({
         success: true,
-        data: donations,
+        data: formatDonation(donations),
     });
 });
 
@@ -84,5 +97,28 @@ export const updateDonationStatus = asyncHandler(async (req: Request, res: Respo
         success: true,
         message: "Donation status updated successfully",
         data,
+    });
+});
+
+// get user donation overview (total donation, total donation count, total donation amount)
+
+export const getUserDonationOverview = asyncHandler(async (req: Request, res: Response) => {
+    const donorId = req.user?.id;
+    const donations = await prisma.donation.findMany({
+        where: {
+            donorId: String(donorId),
+            status: "SUCCESS",
+        },
+        select: {
+            amount: true,
+
+        }
+    });
+    res.json({
+        success: true,
+        data: {
+            totalDonation: donations.length,
+            totalDonationAmount: donations.reduce((acc, donation) => acc + Number(donation.amount), 0),
+        },
     });
 });

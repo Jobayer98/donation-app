@@ -1,7 +1,9 @@
 export type PaymentInfo = {
-    amount: Number,
+    amount: number,
     currency: string,
+    transactionId?: string,
     customer?: {
+        id: string,
         name: string,
         email: string,
     }

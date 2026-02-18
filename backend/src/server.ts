@@ -25,8 +25,8 @@ app.get("/failed", (req, res) => {
 app.use(paymentRoute);
 
 
-app.use(donationRoute);
 app.use(authRoute);
+app.use(donationRoute);
 app.use(campaignRoute);
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
