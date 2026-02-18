@@ -1,5 +1,5 @@
 import express from "express";
-import { authRoute, campaignRoute, donationRoute, paymentRoute } from "./routes";
+import { authRoute, campaignRoute, donationRoute, paymentRoute, fundraiserDashboardRoute } from "./routes";
 import path from "path";
 
 const app = express();
@@ -28,5 +28,6 @@ app.use(paymentRoute);
 app.use(authRoute);
 app.use(donationRoute);
 app.use(campaignRoute);
+app.use(fundraiserDashboardRoute);
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));

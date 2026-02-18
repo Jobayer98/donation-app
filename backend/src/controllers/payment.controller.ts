@@ -24,15 +24,26 @@ export const handlePaymentSuccess = asyncHandler(async (req: Request, res: Respo
 })
 
 export const handlePaymentFail = asyncHandler(async (req: Request, res: Response) => {
-    const { provider, val_id, transactionId } = req.body;
-    console.log(req.body);
-    await paymentService.handleFail({ provider, val_id, transactionId });
+    const { val_id, tran_id } = req.body;
+    const data = await prisma.donation.findUnique({
+        where: {
+            transactionId: tran_id,
+        },
+    });
+    const provider = data?.provider!;
+    await paymentService.handleFail({ provider, val_id, transactionId: tran_id });
     res.redirect("http://localhost:3000/failed");
 })
 
 
 export const handlePaymentCancel = asyncHandler(async (req: Request, res: Response) => {
-    const { provider, val_id, transactionId } = req.body;
-    const result = await paymentService.handleCancel({ provider, val_id, transactionId });
+    const { val_id, tran_id } = req.body;
+    const data = await prisma.donation.findUnique({
+        where: {
+            transactionId: tran_id,
+        },
+    });
+    const provider = data?.provider!;
+    await paymentService.handleCancel({ provider, val_id, transactionId: tran_id });
     res.redirect("http://localhost:3000/cancel");
 })

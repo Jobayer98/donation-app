@@ -36,7 +36,7 @@ class SSLCommerzProvider {
         const data = response.data
 
         if (data.status === 'VALID') {
-            await prisma.donation.update({
+            const result = await prisma.donation.update({
                 where: {
                     transactionId,
                 },
@@ -44,6 +44,34 @@ class SSLCommerzProvider {
                     status: 'SUCCESS',
                 },
             })
+            await prisma.campaign.update({
+                where: {
+                    id: result.campaignId,
+                },
+                data: {
+                    raisedAmount: { increment: Number(result.amount) },
+                },
+            })
+            // await prisma.paymentLog.create({
+            //     data: {
+            //         amount: data.amount,
+            //         bankTranId: data.bankTranId,
+            //         cardBrand: data.cardBrand,
+            //         cardIssuer: data.cardIssuer,
+            //         cardIssuerCountry: data.cardIssuerCountry,
+            //         cardIssuerCountryCode: data.cardIssuerCountryCode,
+            //         cardNo: data.cardNo,
+            //         cardType: data.cardType,
+            //         currency: data.currency,
+            //         currencyAmount: data.currencyAmount,
+            //         currencyRate: data.currencyRate,
+            //         currencyType: data.currencyType,
+            //         storeAmount: data.storeAmount,
+            //         transactionId: data.tranId,
+            //         valId: data.valId,
+            //         fundRaiserId: fundRaiserId ?? ""
+            //     }
+            // })
         } else {
 
             await prisma.donation.update({
