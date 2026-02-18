@@ -53,6 +53,6 @@ export const adminUsers = asyncHandler(async (req, res) => {
 export const updateUserRole = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const data: updateUserRoleDTO = req.body;
-  const user = await adminService.updateUserRole(id, data);
+  const user = await adminService.updateUserRole(String(id), data);
   return res.status(200).json({ success: true, data: user });
 });

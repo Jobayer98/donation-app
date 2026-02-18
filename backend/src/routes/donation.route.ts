@@ -7,11 +7,12 @@ import {
 } from "../controllers/donation.controller";
 import { isAuthenticated, authorize } from "../middlewares/auth.middleware";
 import { validateBody } from "../middlewares/validate.middleware";
+import { donationRateLimit } from "../middlewares/rateLimit.middleware";
 import { DonationSchema } from "../schema/donation.schema";
 
 const router = Router();
 
-router.post("/", validateBody(DonationSchema), createDonationIntent);
+router.post("/", donationRateLimit, validateBody(DonationSchema), createDonationIntent);
 
 router.use(isAuthenticated, authorize("DONOR"));
 
