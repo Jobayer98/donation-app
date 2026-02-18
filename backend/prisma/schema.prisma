@@ -27,15 +27,17 @@ enum DonationStatus {
 }
 
 model User {
-  id                 String     @id @default(uuid(7))
+  id                 String            @id @default(uuid(7))
   name               String
-  email              String     @unique
+  email              String            @unique
   password           String
-  role               UserRole   @default(FUND_RAISER)
-  verificationStatus Boolean    @default(false) @map("verification_status")
-  createdAt          DateTime   @default(now()) @map("created_at")
+  role               UserRole          @default(FUND_RAISER)
+  verificationStatus Boolean           @default(false) @map("verification_status")
+  createdAt          DateTime          @default(now()) @map("created_at")
   campaigns          Campaign[]
   donations          Donation[]
+  paymentProviders   PaymentProvider[]
+  paymentLogs        PaymentLog[]
 
   @@map("users")
 }
@@ -68,6 +70,7 @@ model Donation {
   amount        Decimal
   status        DonationStatus @default(PENDING)
   isAnonymous   Boolean        @default(false)
+  provider      String
   transactionId String?        @unique @map("transaction_id")
   createdAt     DateTime       @default(now()) @map("created_at")
 
@@ -77,4 +80,45 @@ model Donation {
   @@index([campaignId])
   @@index([donorId])
   @@map("donations")
+}
+
+model PaymentProvider {
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  config    Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  fundRaiser   User   @relation(fields: [fundRaiserId], references: [id])
+  fundRaiserId String @map("fund_raiser_id")
+
+  @@map("payment_providers")
+}
+
+model PaymentLog {
+  id                    String  @id @default(uuid())
+  transactionId         String  @unique @map("transaction_id")
+  valId                 String  @unique @map("val_id")
+  amount                Decimal
+  storeAmount           Decimal @map("store_amount")
+  currency              String
+  bankTranId            String  @map("bank_tran_id")
+  cardType              String  @map("card_type")
+  cardNo                String  @map("card_no")
+  cardIssuer            String  @map("card_issuer")
+  cardBrand             String  @map("card_brand")
+  cardIssuerCountry     String  @map("card_issuer_country")
+  cardIssuerCountryCode String  @map("card_issuer_country_code")
+  currencyType          String  @map("currency_type")
+  currencyAmount        Decimal @map("currency_amount")
+  currencyRate          Decimal @map("currency_rate")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  fundRaiser   User   @relation(fields: [fundRaiserId], references: [id])
+  fundRaiserId String @map("fund_raiser_id")
+
+  @@map("payment_logs")
 }
