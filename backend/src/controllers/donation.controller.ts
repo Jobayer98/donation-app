@@ -36,13 +36,13 @@ export const createDonationIntent = asyncHandler(async (req: Request, res: Respo
     });
 });
 
-export const findAllDonations = asyncHandler(async (req: Request, res: Response) => {
-    const donations = await prisma.donation.findMany();
-    res.json({
-        success: true,
-        data: donations,
-    });
-});
+// export const findAllDonations = asyncHandler(async (req: Request, res: Response) => {
+//     const donations = await prisma.donation.findMany();
+//     res.json({
+//         success: true,
+//         data: donations,
+//     });
+// });
 
 export const findDonationById = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -82,26 +82,7 @@ export const findMyDonations = asyncHandler(async (req: Request, res: Response) 
     });
 });
 
-export const updateDonationStatus = asyncHandler(async (req: Request, res: Response) => {
-    const { id, status, transactionId } = req.body;
-    let data = await prisma.donation.update({
-        where: {
-            id,
-        },
-        data: {
-            status,
-            transactionId,
-        },
-    });
-    res.json({
-        success: true,
-        message: "Donation status updated successfully",
-        data,
-    });
-});
-
 // get user donation overview (total donation, total donation count, total donation amount)
-
 export const getUserDonationOverview = asyncHandler(async (req: Request, res: Response) => {
     const donorId = req.user?.id;
     const donations = await prisma.donation.findMany({

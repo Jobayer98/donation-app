@@ -3,9 +3,6 @@ import { prisma } from "../lib/prisma";
 import { campaignStatusDTO, createCampaignDTO } from "../schema/campaign.schema";
 import asyncHandler from "../utils/asyncHandler";
 
-const totalRaised = async () => {
-
-}
 
 export const createCampaign = asyncHandler(async (req: Request, res: Response) => {
   let data: createCampaignDTO = req.body;
@@ -61,40 +58,6 @@ export const findActiveCampaign = asyncHandler(async (req: Request, res: Respons
         total: await prisma.campaign.count({
           where: {
             status: "ACTIVE",
-          },
-        }),
-      },
-    },
-  });
-});
-
-export const findAllCampaign = asyncHandler(async (req: Request, res: Response) => {
-  let { page = 1, limit = 10, status = undefined } = req.query;
-  let data = await prisma.campaign.findMany({
-    skip: (Number(page) - 1) * Number(limit),
-    take: Number(limit),
-    where: {
-      status: status ? status as campaignStatusDTO : undefined,
-    },
-    select: {
-      id: true,
-      title: true,
-      goalAmount: true,
-      raisedAmount: true,
-    }
-  });
-
-  res.json({
-    success: true,
-    message: "Campaigns retrieved successfully",
-    data: {
-      campaigns: data,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total: await prisma.campaign.count({
-          where: {
-            status: status ? status as campaignStatusDTO : undefined,
           },
         }),
       },

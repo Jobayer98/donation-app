@@ -1,6 +1,7 @@
 import express from "express";
-import { authRoute, campaignRoute, donationRoute, paymentRoute, fundraiserDashboardRoute } from "./routes";
+
 import path from "path";
+import apiRoute from "./routes";
 
 const app = express();
 const port = 3000;
@@ -22,12 +23,7 @@ app.get("/cancel", (req, res) => {
 app.get("/failed", (req, res) => {
     res.sendFile(path.join(__dirname, "../public/failed.html"));
 });
-app.use(paymentRoute);
 
-
-app.use(authRoute);
-app.use(donationRoute);
-app.use(campaignRoute);
-app.use(fundraiserDashboardRoute);
+app.use(apiRoute)
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
