@@ -33,6 +33,9 @@ model User {
   password           String
   role               UserRole          @default(DONOR)
   verificationStatus Boolean           @default(false) @map("verification_status")
+  verificationToken  String?           @map("verification_token")
+  resetToken         String?           @map("reset_token")
+  resetTokenExpiry   DateTime?         @map("reset_token_expiry")
   createdAt          DateTime          @default(now()) @map("created_at")
   campaigns          Campaign[]
   donations          Donation[]
