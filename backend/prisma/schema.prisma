@@ -85,6 +85,7 @@ model Donation {
 model PaymentProvider {
   id        String   @id @default(uuid())
   name      String
+  currency  String   @default("BDT")
   isActive  Boolean  @default(true) @map("is_active")
   config    Json
   createdAt DateTime @default(now()) @map("created_at")
@@ -93,6 +94,7 @@ model PaymentProvider {
   fundRaiser   User   @relation(fields: [fundRaiserId], references: [id])
   fundRaiserId String @map("fund_raiser_id")
 
+  @@unique([id, fundRaiserId])
   @@map("payment_providers")
 }
 
