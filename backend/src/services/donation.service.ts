@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { ApiError } from "../utils/ApiError";
+import { sendDonationReceipt, sendDonationNotification } from "../utils/email";
 
 class DonationService {
   async createIntent(
@@ -84,6 +85,54 @@ class DonationService {
       data: { raisedAmount: { increment: amount } },
       select: { fundraiserId: true },
     });
+  }
+
+  async sendDonationEmails(transactionId: string) {
+    const donation = await prisma.donation.findUnique({
+      where: { transactionId },
+      include: {
+        donor: { select: { name: true, email: true } },
+        campaign: {
+          select: {
+            title: true,
+            user: { select: { name: true, email: true } }
+          }
+        }
+      }
+    });
+
+    if (!donation || donation.status !== "SUCCESS") return;
+
+    const emailPromises = [];
+
+    // Send receipt to donor
+    if (donation.donor && !donation.isAnonymous) {
+      emailPromises.push(
+        sendDonationReceipt(
+          donation.donor.email,
+          donation.donor.name,
+          Number(donation.amount),
+          'USD',
+          donation.campaign.title,
+          transactionId
+        )
+      );
+    }
+
+    // Send notification to fundraiser
+    emailPromises.push(
+      sendDonationNotification(
+        donation.campaign.user.email,
+        donation.campaign.user.name,
+        donation.donor?.name || 'Anonymous',
+        Number(donation.amount),
+        'USD',
+        donation.campaign.title,
+        donation.isAnonymous
+      )
+    );
+
+    await Promise.all(emailPromises);
   }
 }
 

@@ -14,6 +14,7 @@ export const handlePaymentSuccess = asyncHandler(async (req: Request, res: Respo
     const donation = await donationService.findByTransaction(tran_id);
 
     await paymentService.handlePaymentCallback({ provider: donation!.provider, val_id, transactionId: tran_id });
+    await donationService.sendDonationEmails(tran_id);
     res.redirect("http://localhost:3000/success");
 });
 

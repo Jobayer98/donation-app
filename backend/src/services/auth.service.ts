@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma";
 import { loginDTO, registerDTO } from "../schema/auth.shcema";
 import { hashPassword, verifyPassword } from "../utils/auth";
 import { generateAccessToken } from "../utils/jwt";
-import { sendVerificationEmail, sendPasswordResetEmail } from "../utils/email";
+import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "../utils/email";
 import crypto from "crypto";
 import { ApiError } from "../utils/ApiError";
 
@@ -21,13 +21,16 @@ class AuthService {
                 role: data.role,
                 verificationToken
             },
-            select: { id: true, role: true, email: true }
+            select: { id: true, role: true, email: true, name: true }
         });
 
-        await sendVerificationEmail(user.email, verificationToken);
+        await Promise.all([
+            sendWelcomeEmail(user.email, user.name),
+            sendVerificationEmail(user.email, user.name, verificationToken)
+        ]);
 
         const token = generateAccessToken({ id: user.id, role: user.role });
-        return { id: user.id, token, message: "Please verify your email" };
+        return { id: user.id, token, message: "Please check your email to verify your account" };
     }
 
     async login(data: loginDTO) {
@@ -79,7 +82,7 @@ class AuthService {
             data: { resetToken, resetTokenExpiry }
         });
 
-        await sendPasswordResetEmail(email, resetToken);
+        await sendPasswordResetEmail(email, user.name, resetToken);
 
         return { message: "If email exists, reset link sent" };
     }
