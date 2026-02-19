@@ -1,7 +1,8 @@
 export type PaymentInfo = {
     amount: number,
-    currency: string,
-    transactionId?: string,
+    transactionId: string,
+    campaignId: string,
+    providerName: string,
     customer?: {
         id: string,
         name: string,
