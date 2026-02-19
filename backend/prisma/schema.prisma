@@ -26,6 +26,18 @@ enum DonationStatus {
   FAILED
 }
 
+enum PlanType {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  PAST_DUE
+}
+
 model User {
   id                 String            @id @default(uuid(7))
   name               String
@@ -41,6 +53,7 @@ model User {
   donations          Donation[]
   paymentProviders   PaymentProvider[]
   paymentLogs        PaymentLog[]
+  subscription       Subscription?
 
   @@map("users")
 }
@@ -127,4 +140,39 @@ model PaymentLog {
   fundRaiserId String @map("fund_raiser_id")
 
   @@map("payment_logs")
+}
+
+model Plan {
+  id            String         @id @default(uuid())
+  name          String
+  type          PlanType       @unique
+  price         Decimal
+  interval      String         @default("month")
+  features      Json
+  limits        Json
+  isActive      Boolean        @default(true) @map("is_active")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique @map("user_id")
+  planId               String             @map("plan_id")
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  stripeCustomerId     String?            @map("stripe_customer_id")
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
 }

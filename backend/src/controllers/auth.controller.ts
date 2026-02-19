@@ -1,15 +1,26 @@
 import { Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler";
 import authService from "../services/auth.service";
-import { loginDTO, registerDTO } from "../schema/auth.shcema";
+import { loginDTO, registerDonorDTO, registerFundraiserDTO } from "../schema/auth.shcema";
 
-export const register = asyncHandler(async (req: Request, res: Response) => {
-  const data: registerDTO = req.body;
-  const result = await authService.register(data);
+export const registerDonor = asyncHandler(async (req: Request, res: Response) => {
+  const data: registerDonorDTO = req.body;
+  const result = await authService.registerDonor(data);
 
   res.status(201).json({
     success: true,
-    message: "User register successfully",
+    message: "Donor registered successfully",
+    data: result
+  });
+});
+
+export const registerFundraiser = asyncHandler(async (req: Request, res: Response) => {
+  const data: registerFundraiserDTO = req.body;
+  const result = await authService.registerFundraiser(data);
+
+  res.status(201).json({
+    success: true,
+    message: "Fundraiser registered successfully. Free plan activated!",
     data: result
   });
 });

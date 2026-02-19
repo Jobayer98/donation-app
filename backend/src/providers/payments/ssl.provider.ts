@@ -15,8 +15,10 @@ class SSLCommerzProvider implements IPaymentProvider {
       select: { fundraiserId: true },
     });
 
-
-    const config = await paymentProviderService.getConfig(campaign!.fundraiserId, paymentInfo.providerName);
+    const config = await paymentProviderService.getConfig(
+      campaign!.fundraiserId,
+      paymentInfo.providerName,
+    );
     if (!config) throw new ApiError(400, "Payment provider not configured");
 
     const params = new URLSearchParams({
@@ -46,7 +48,10 @@ class SSLCommerzProvider implements IPaymentProvider {
       include: { campaign: { select: { fundraiserId: true } } },
     });
 
-    const config = await paymentProviderService.getConfig(donation!.campaign.fundraiserId, "sslcommerz");
+    const config = await paymentProviderService.getConfig(
+      donation!.campaign.fundraiserId,
+      "sslcommerz",
+    );
     if (!config) throw new ApiError(400, "Payment provider not configured");
 
     const response = await axios.get(

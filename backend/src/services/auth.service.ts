@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma";
-import { loginDTO, registerDTO } from "../schema/auth.shcema";
+import { loginDTO, registerDonorDTO, registerFundraiserDTO } from "../schema/auth.shcema";
 import { hashPassword, verifyPassword } from "../utils/auth";
 import { generateAccessToken } from "../utils/jwt";
 import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "../utils/email";
@@ -7,7 +7,15 @@ import crypto from "crypto";
 import { ApiError } from "../utils/ApiError";
 
 class AuthService {
-    async register(data: registerDTO) {
+    async registerDonor(data: registerDonorDTO) {
+        return this.register({ ...data, role: 'DONOR' });
+    }
+
+    async registerFundraiser(data: registerFundraiserDTO) {
+        return this.register({ ...data, role: 'FUND_RAISER' });
+    }
+
+    private async register(data: { name: string; email: string; password: string; role: 'DONOR' | 'FUND_RAISER' }) {
         const hashPass = await hashPassword(data.password);
         if (!hashPass) throw new Error("Error hashing password");
 
@@ -23,6 +31,27 @@ class AuthService {
             },
             select: { id: true, role: true, email: true, name: true }
         });
+
+        // Auto-subscribe fundraisers to free plan
+        if (data.role === 'FUND_RAISER') {
+            const freePlan = await prisma.plan.findUnique({ where: { type: 'FREE' } });
+            
+            if (freePlan) {
+                const now = new Date();
+                const endDate = new Date(now);
+                endDate.setFullYear(endDate.getFullYear() + 100);
+
+                await prisma.subscription.create({
+                    data: {
+                        userId: user.id,
+                        planId: freePlan.id,
+                        status: 'ACTIVE',
+                        currentPeriodStart: now,
+                        currentPeriodEnd: endDate,
+                    }
+                });
+            }
+        }
 
         await Promise.all([
             sendWelcomeEmail(user.email, user.name),
@@ -75,7 +104,7 @@ class AuthService {
         }
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+        const resetTokenExpiry = new Date(Date.now() + 3600000);
 
         await prisma.user.update({
             where: { id: user.id },

@@ -3,6 +3,7 @@ import express from "express";
 import path from "path";
 import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
+import { bootstrap } from "./bootstrap";
 
 const app = express();
 const port = 3000;
@@ -24,4 +25,6 @@ app.get("/failed", (req, res) => {
 app.use("/api", apiRoute);
 app.use(errorHandler);
 
-app.listen(port, () => console.log(`Server listening on port ${port}!`));
+bootstrap().then(() => {
+  app.listen(port, () => console.log(`Server listening on port ${port}!`));
+});
