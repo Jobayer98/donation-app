@@ -38,41 +38,51 @@ enum SubscriptionStatus {
   PAST_DUE
 }
 
+enum OrgMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
 model User {
-  id                 String            @id @default(uuid(7))
+  id                 String                @id @default(uuid(7))
   name               String
-  email              String            @unique
+  email              String                @unique
   password           String
-  role               UserRole          @default(DONOR)
-  verificationStatus Boolean           @default(false) @map("verification_status")
-  verificationToken  String?           @map("verification_token")
-  resetToken         String?           @map("reset_token")
-  resetTokenExpiry   DateTime?         @map("reset_token_expiry")
-  createdAt          DateTime          @default(now()) @map("created_at")
+  role               UserRole              @default(DONOR)
+  verificationStatus Boolean               @default(false) @map("verification_status")
+  verificationToken  String?               @map("verification_token")
+  resetToken         String?               @map("reset_token")
+  resetTokenExpiry   DateTime?             @map("reset_token_expiry")
+  createdAt          DateTime              @default(now()) @map("created_at")
   campaigns          Campaign[]
   donations          Donation[]
   paymentProviders   PaymentProvider[]
   paymentLogs        PaymentLog[]
   subscription       Subscription?
+  ownedOrganizations Organization[]        @relation("OrganizationOwner")
+  organizationMembers OrganizationMember[]
 
   @@map("users")
 }
 
 model Campaign {
-  id           String         @id @default(uuid(7))
-  title        String
-  description  String?
-  type         String //→ donation | crowdfunding
-  goalAmount   Decimal        @map("goal_amount")
-  raisedAmount Decimal        @map("raised_amount")
-  startDate    DateTime       @map("start_date")
-  endDate      DateTime       @map("end_date")
-  status       CampaignStatus @default(DRAFT)
-  category     String
-  createdAt    DateTime       @default(now()) @map("created_at")
+  id             String         @id @default(uuid(7))
+  title          String
+  description    String?
+  type           String
+  goalAmount     Decimal        @map("goal_amount")
+  raisedAmount   Decimal        @map("raised_amount")
+  startDate      DateTime       @map("start_date")
+  endDate        DateTime       @map("end_date")
+  status         CampaignStatus @default(DRAFT)
+  category       String
+  organizationId String?        @map("organization_id")
+  createdAt      DateTime       @default(now()) @map("created_at")
 
-  user         User       @relation(fields: [fundraiserId], references: [id])
-  fundraiserId String     @map("fundraiser_id")
+  user         User          @relation(fields: [fundraiserId], references: [id])
+  fundraiserId String        @map("fundraiser_id")
+  organization Organization? @relation(fields: [organizationId], references: [id])
   donations    Donation[]
 
   @@map("campaigns")
@@ -175,4 +185,34 @@ model Subscription {
   plan Plan @relation(fields: [planId], references: [id])
 
   @@map("subscriptions")
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  ownerId   String   @map("owner_id")
+  settings  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner     User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  members   OrganizationMember[]
+  campaigns Campaign[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String        @id @default(uuid())
+  organizationId String        @map("organization_id")
+  userId         String        @map("user_id")
+  role           OrgMemberRole @default(MEMBER)
+  joinedAt       DateTime      @default(now()) @map("joined_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
 }
