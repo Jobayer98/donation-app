@@ -2,13 +2,14 @@ import { Router } from "express";
 import { closeCampaign, createCampaign, fundraiserCampaigns, fundraiserOverview, getCampaignDonations, getCampaignStats, publishCampaign, updateCampaign } from "../../controllers/campaign.controller";
 import { createPaymentProvider, getMyPaymentProviders, togglePaymentProvider } from "../../controllers/paymentProvider.controller";
 import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
+import { requireVerified } from "../../middlewares/verification.middleware";
 import { validateBody } from "../../middlewares/validate.middleware";
 import { CreateCampaignSchema, UpdateCampaignSchema } from "../../schema/campaign.schema";
 import { CreatePaymentProviderSchema } from "../../schema/paymentProvider.schema";
 
 const router = Router();
 
-router.use(isAuthenticated, authorize("FUND_RAISER"));
+router.use(isAuthenticated, authorize("FUND_RAISER"), requireVerified);
 
 router.post("/campaigns", validateBody(CreateCampaignSchema), createCampaign);
 router.patch("/campaigns/:id", validateBody(UpdateCampaignSchema), updateCampaign);

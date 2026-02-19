@@ -28,3 +28,33 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     data: result
   });
 });
+
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = req.query;
+  const result = await authService.verifyEmail(token as string);
+
+  res.json({
+    success: true,
+    message: result.message
+  });
+});
+
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await authService.forgotPassword(email);
+
+  res.json({
+    success: true,
+    message: result.message
+  });
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+  const result = await authService.resetPassword(token, password);
+
+  res.json({
+    success: true,
+    message: result.message
+  });
+});

@@ -1,9 +1,12 @@
 import { prisma } from "../lib/prisma";
+import { encrypt, decrypt } from "../utils/crypto";
 
 class PaymentProviderService {
   async create(name: string, config: any, fundRaiserId: string) {
+    const encryptedConfig = encrypt(JSON.stringify(config));
+    
     return prisma.paymentProvider.create({
-      data: { name, config, fundRaiserId },
+      data: { name, config: encryptedConfig, fundRaiserId },
       select: { id: true, name: true, isActive: true },
     });
   }
@@ -47,8 +50,8 @@ class PaymentProviderService {
       throw new Error('Payment provider not found');
     }
 
-    const config = provider.config as any;
-    const jsonConfig = JSON.parse(config);
+    const decryptedConfig = decrypt(provider.config as string);
+    const jsonConfig = JSON.parse(decryptedConfig);
 
     return {
       storeId: jsonConfig.api_key,
