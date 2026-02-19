@@ -90,6 +90,7 @@ model PaymentProvider {
   name      String
   currency  String   @default("BDT")
   isActive  Boolean  @default(true) @map("is_active")
+  isDefault Boolean  @default(false) @map("is_default")
   config    Json
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
