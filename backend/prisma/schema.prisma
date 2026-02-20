@@ -45,22 +45,24 @@ enum OrgMemberRole {
 }
 
 model User {
-  id                 String                @id @default(uuid(7))
-  name               String
-  email              String                @unique
-  password           String
-  role               UserRole              @default(DONOR)
-  verificationStatus Boolean               @default(false) @map("verification_status")
-  verificationToken  String?               @map("verification_token")
-  resetToken         String?               @map("reset_token")
-  resetTokenExpiry   DateTime?             @map("reset_token_expiry")
-  createdAt          DateTime              @default(now()) @map("created_at")
-  campaigns          Campaign[]
-  donations          Donation[]
-  paymentProviders   PaymentProvider[]
-  paymentLogs        PaymentLog[]
-  subscription       Subscription?
-  ownedOrganizations Organization[]        @relation("OrganizationOwner")
+  id                  String               @id @default(uuid(7))
+  name                String
+  email               String               @unique
+  password            String
+  role                UserRole             @default(DONOR)
+  verificationStatus  Boolean              @default(false) @map("verification_status")
+  verificationToken   String?              @map("verification_token")
+  resetToken          String?              @map("reset_token")
+  resetTokenExpiry    DateTime?            @map("reset_token_expiry")
+  onboardingCompleted Boolean              @default(false) @map("onboarding_completed")
+  onboardingStep      Int                  @default(0) @map("onboarding_step")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  campaigns           Campaign[]
+  donations           Donation[]
+  paymentProviders    PaymentProvider[]
+  paymentLogs         PaymentLog[]
+  subscription        Subscription?
+  ownedOrganizations  Organization[]       @relation("OrganizationOwner")
   organizationMembers OrganizationMember[]
 
   @@map("users")
@@ -188,18 +190,23 @@ model Subscription {
 }
 
 model Organization {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  ownerId   String   @map("owner_id")
-  settings  Json?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  name           String
+  slug           String   @unique
+  ownerId        String   @map("owner_id")
+  settings       Json?
+  logoUrl        String?  @map("logo_url")
+  primaryColor   String?  @default("#667eea") @map("primary_color")
+  secondaryColor String?  @default("#764ba2") @map("secondary_color")
+  customDomain   String?  @unique @map("custom_domain")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   owner     User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
   members   OrganizationMember[]
   campaigns Campaign[]
 
+  @@index([customDomain])
   @@map("organizations")
 }
 
