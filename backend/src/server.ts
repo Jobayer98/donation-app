@@ -1,4 +1,5 @@
 import express from "express";
+import { initializeSocket } from "./utils/socket";
 
 import path from "path";
 import apiRoute from "./routes";
@@ -12,6 +13,10 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+
+app.get("/notify", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/notify.html"));
+});
 app.get("/success", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/success.html"));
 });
@@ -26,5 +31,8 @@ app.use("/api", apiRoute);
 app.use(errorHandler);
 
 bootstrap().then(() => {
-  app.listen(port, () => console.log(`Server listening on port ${port}!`));
+  const server = app.listen(port, () =>
+    console.log(`Server listening on port ${port}!`),
+  );
+  initializeSocket(server);
 });

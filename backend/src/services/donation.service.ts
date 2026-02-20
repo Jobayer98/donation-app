@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { ApiError } from "../utils/ApiError";
 import { sendDonationReceipt, sendDonationNotification } from "../utils/email";
+import notificationService from "./notification.service";
 
 class DonationService {
   async createIntent(
@@ -11,20 +12,35 @@ class DonationService {
     provider: string,
     donorId?: string,
   ) {
-    const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: campaignId },
+    });
     if (!campaign) throw new ApiError(404, "Campaign not found");
-    if (campaign.status !== "ACTIVE") throw new ApiError(400, "Campaign is not active");
-    if (new Date() > campaign.endDate) throw new ApiError(400, "Campaign has ended");
-    
-    const remaining = Number(campaign.goalAmount) - Number(campaign.raisedAmount);
-    if (remaining <= 0) throw new ApiError(400, "Campaign goal already reached");
-    if (amount > remaining) throw new ApiError(400, `Donation exceeds remaining goal. Maximum: ${remaining}`);
+    if (campaign.status !== "ACTIVE")
+      throw new ApiError(400, "Campaign is not active");
+    if (new Date() > campaign.endDate)
+      throw new ApiError(400, "Campaign has ended");
+
+    const remaining =
+      Number(campaign.goalAmount) - Number(campaign.raisedAmount);
+    if (remaining <= 0)
+      throw new ApiError(400, "Campaign goal already reached");
+    if (amount > remaining)
+      throw new ApiError(
+        400,
+        `Donation exceeds remaining goal. Maximum: ${remaining}`,
+      );
 
     if (donorId) {
       const recentDonation = await prisma.donation.findFirst({
-        where: { donorId, campaignId, createdAt: { gte: new Date(Date.now() - 60000) } },
+        where: {
+          donorId,
+          campaignId,
+          createdAt: { gte: new Date(Date.now() - 60000) },
+        },
       });
-      if (recentDonation) throw new ApiError(429, "Please wait before making another donation");
+      if (recentDonation)
+        throw new ApiError(429, "Please wait before making another donation");
     }
 
     return prisma.donation.create({
@@ -95,13 +111,27 @@ class DonationService {
         campaign: {
           select: {
             title: true,
-            user: { select: { name: true, email: true } }
-          }
-        }
-      }
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
+      },
     });
 
     if (!donation || donation.status !== "SUCCESS") return;
+
+    // Create in-app notification for fundraiser
+    await notificationService.create(
+      donation.campaign.user.id,
+      "DONATION",
+      "New Donation Received",
+      `You received $${Number(donation.amount)} from ${donation.donor?.name || "Anonymous"} for ${donation.campaign.title}`,
+      {
+        donationId: donation.id,
+        campaignId: donation.campaignId,
+        amount: Number(donation.amount),
+        donorName: donation.donor?.name || "Anonymous",
+      },
+    );
 
     const emailPromises = [];
 
@@ -112,10 +142,10 @@ class DonationService {
           donation.donor.email,
           donation.donor.name,
           Number(donation.amount),
-          'USD',
+          "BDT", // Assuming BDT as per previous context or fallback to config if available
           donation.campaign.title,
-          transactionId
-        )
+          transactionId,
+        ),
       );
     }
 
@@ -124,12 +154,12 @@ class DonationService {
       sendDonationNotification(
         donation.campaign.user.email,
         donation.campaign.user.name,
-        donation.donor?.name || 'Anonymous',
+        donation.donor?.name || "Anonymous",
         Number(donation.amount),
-        'USD',
+        "BDT",
         donation.campaign.title,
-        donation.isAnonymous
-      )
+        donation.isAnonymous,
+      ),
     );
 
     await Promise.all(emailPromises);

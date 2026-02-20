@@ -29,6 +29,7 @@ enum DonationStatus {
 enum PlanType {
   FREE
   PRO
+  ENTERPRISE
 }
 
 enum SubscriptionStatus {
@@ -42,6 +43,13 @@ enum OrgMemberRole {
   OWNER
   ADMIN
   MEMBER
+}
+
+enum NotificationType {
+  DONATION
+  CAMPAIGN
+  SYSTEM
+  TEAM
 }
 
 model User {
@@ -64,6 +72,7 @@ model User {
   subscription        Subscription?
   ownedOrganizations  Organization[]       @relation("OrganizationOwner")
   organizationMembers OrganizationMember[]
+  notifications       Notification[]
 
   @@map("users")
 }
@@ -222,4 +231,21 @@ model OrganizationMember {
 
   @@unique([organizationId, userId])
   @@map("organization_members")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@map("notifications")
 }
