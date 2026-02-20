@@ -2,8 +2,8 @@ import { Router } from "express";
 import {
   findOneCampaign,
   findActiveCampaign,
-} from "../controllers/campaign.controller";
-import { getActiveProviders } from "../controllers/paymentProvider.controller";
+} from "../../controllers/campaign.controller";
+import { getActiveProviders } from "../../controllers/paymentProvider.controller";
 
 const router = Router();
 

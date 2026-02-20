@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { closeCampaign, createCampaign, fundraiserCampaigns, fundraiserOverview, getCampaignDonations, getCampaignStats, publishCampaign, updateCampaign } from "../../controllers/campaign.controller";
-import { createPaymentProvider, deletePaymentProvider, getMyPaymentProviders, setDefaultProvider, togglePaymentProvider, updatePaymentProvider } from "../../controllers/paymentProvider.controller";
-import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
-import { requireVerified } from "../../middlewares/verification.middleware";
-import { checkCampaignLimit, checkPaymentProviderLimit } from "../../middlewares/planLimits.middleware";
-import { validateBody } from "../../middlewares/validate.middleware";
-import { CreateCampaignSchema, UpdateCampaignSchema } from "../../schema/campaign.schema";
-import { CreatePaymentProviderSchema, UpdatePaymentProviderSchema } from "../../schema/paymentProvider.schema";
+import { closeCampaign, createCampaign, fundraiserCampaigns, fundraiserOverview, getCampaignDonations, getCampaignStats, publishCampaign, updateCampaign } from "../../../controllers/campaign.controller";
+import { createPaymentProvider, deletePaymentProvider, getMyPaymentProviders, setDefaultProvider, togglePaymentProvider, updatePaymentProvider } from "../../../controllers/paymentProvider.controller";
+import { isAuthenticated, authorize } from "../../../middlewares/auth.middleware";
+import { requireVerified } from "../../../middlewares/verification.middleware";
+import { checkCampaignLimit, checkPaymentProviderLimit } from "../../../middlewares/planLimits.middleware";
+import { validateBody } from "../../../middlewares/validate.middleware";
+import { CreateCampaignSchema, UpdateCampaignSchema } from "../../../schema/campaign.schema";
+import { CreatePaymentProviderSchema, UpdatePaymentProviderSchema } from "../../../schema/paymentProvider.schema";
 
 const router = Router();
 

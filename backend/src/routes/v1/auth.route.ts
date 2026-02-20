@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { login, registerDonor, registerFundraiser, verifyEmail, forgotPassword, resetPassword } from "../controllers/auth.controller";
-import { validateBody, validateQuery } from "../middlewares/validate.middleware";
-import { LoginSchema, RegisterDonorSchema, RegisterFundraiserSchema } from "../schema/auth.shcema";
-import { forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema } from "../schema/verification.schema";
+import { login, registerDonor, registerFundraiser, verifyEmail, forgotPassword, resetPassword } from "../../controllers/auth.controller";
+import { validateBody, validateQuery } from "../../middlewares/validate.middleware";
+import { LoginSchema, RegisterDonorSchema, RegisterFundraiserSchema } from "../../schema/auth.shcema";
+import { forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema } from "../../schema/verification.schema";
 
 const router = Router();
 

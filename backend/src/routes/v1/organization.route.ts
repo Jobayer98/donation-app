@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { addMember, createOrganization, deleteOrganization, getMyOrganizations, getOrganization, removeMember, updateMemberRole, updateOrganization } from "../controllers/organization.controller";
-import { isAuthenticated, authorize } from "../middlewares/auth.middleware";
-import { validateBody } from "../middlewares/validate.middleware";
-import { addMemberSchema, createOrganizationSchema, updateMemberRoleSchema, updateOrganizationSchema } from "../schema/organization.schema";
+import { addMember, createOrganization, deleteOrganization, getMyOrganizations, getOrganization, removeMember, updateMemberRole, updateOrganization } from "../../controllers/organization.controller";
+import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
+import { validateBody } from "../../middlewares/validate.middleware";
+import { addMemberSchema, createOrganizationSchema, updateMemberRoleSchema, updateOrganizationSchema } from "../../schema/organization.schema";
 
 const router = Router();
 

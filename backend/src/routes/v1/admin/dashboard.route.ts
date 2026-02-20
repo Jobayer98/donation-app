@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { adminOverview, adminCampaigns, adminCampaignStatus, adminUsers, updateUserRole } from "../../controllers/admin.controller";
-import { cancelUserSubscription, createPlan, getAllPlans, getAllSubscriptions, getSubscriptionStats, togglePlanStatus, updatePlan } from "../../controllers/adminPlan.controller";
-import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
-import { validateBody } from "../../middlewares/validate.middleware";
-import { UpdateCampaignStatusSchema } from "../../schema/campaign.schema";
-import { UpdateUserRoleSchema } from "../../schema/user.schema";
-import { createPlanSchema, updatePlanSchema } from "../../schema/adminPlan.schema";
+import { adminOverview, adminCampaigns, adminCampaignStatus, adminUsers, updateUserRole } from "../../../controllers/admin.controller";
+import { cancelUserSubscription, createPlan, getAllPlans, getAllSubscriptions, getSubscriptionStats, togglePlanStatus, updatePlan } from "../../../controllers/adminPlan.controller";
+import { isAuthenticated, authorize } from "../../../middlewares/auth.middleware";
+import { validateBody } from "../../../middlewares/validate.middleware";
+import { UpdateCampaignStatusSchema } from "../../../schema/campaign.schema";
+import { UpdateUserRoleSchema } from "../../../schema/user.schema";
+import { createPlanSchema, updatePlanSchema } from "../../../schema/adminPlan.schema";
 
 const router = Router();
 

@@ -4,11 +4,11 @@ import {
   findDonationById,
   findMyDonations,
   getUserDonationOverview,
-} from "../controllers/donation.controller";
-import { isAuthenticated, authorize } from "../middlewares/auth.middleware";
-import { validateBody } from "../middlewares/validate.middleware";
-import { donationRateLimit } from "../middlewares/rateLimit.middleware";
-import { DonationSchema } from "../schema/donation.schema";
+} from "../../controllers/donation.controller";
+import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
+import { validateBody } from "../../middlewares/validate.middleware";
+import { donationRateLimit } from "../../middlewares/rateLimit.middleware";
+import { DonationSchema } from "../../schema/donation.schema";
 
 const router = Router();
 

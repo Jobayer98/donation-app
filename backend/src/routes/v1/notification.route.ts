@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { deleteAllNotifications, deleteNotification, getNotifications, markAllAsRead, markAsRead } from "../controllers/notification.controller";
-import { isAuthenticated } from "../middlewares/auth.middleware";
+import { deleteAllNotifications, deleteNotification, getNotifications, markAllAsRead, markAsRead } from "../../controllers/notification.controller";
+import { isAuthenticated } from "../../middlewares/auth.middleware";
 
 const router = Router();
 

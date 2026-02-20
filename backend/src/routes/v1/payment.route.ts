@@ -4,9 +4,9 @@ import {
   handlePaymentCancel,
   handlePaymentFail,
   handlePaymentSuccess,
-} from "../controllers/payment.controller";
-import { validateBody } from "../middlewares/validate.middleware";
-import { PaymentSchema, PaymentCallbackSchema } from "../schema/payment.schema";
+} from "../../controllers/payment.controller";
+import { validateBody } from "../../middlewares/validate.middleware";
+import { PaymentSchema, PaymentCallbackSchema } from "../../schema/payment.schema";
 
 const router = Router();
 
