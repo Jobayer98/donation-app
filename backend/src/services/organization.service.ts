@@ -61,7 +61,7 @@ class OrganizationService {
     return org;
   }
 
-  async update(id: string, userId: string, data: { name?: string; settings?: any }) {
+  async update(id: string, userId: string, data: { name?: string; settings?: any; logoUrl?: string; primaryColor?: string; secondaryColor?: string; customDomain?: string }) {
     await this.checkPermission(id, userId, ['OWNER', 'ADMIN']);
 
     return prisma.organization.update({

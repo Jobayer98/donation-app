@@ -34,11 +34,11 @@ export const getOrganization = asyncHandler(
 
 export const updateOrganization = asyncHandler(
   async (req: Request, res: Response) => {
-    const { name, settings } = req.body;
+    const { name, settings, logoUrl, primaryColor, secondaryColor, customDomain } = req.body;
     const organization = await organizationService.update(
       String(req.params.id),
       req.user!.id,
-      { name, settings },
+      { name, settings, logoUrl, primaryColor, secondaryColor, customDomain },
     );
 
     res.json({

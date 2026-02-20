@@ -7,6 +7,10 @@ export const createOrganizationSchema = z.object({
 export const updateOrganizationSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   settings: z.record(z.any(), z.any()).optional(),
+  logoUrl: z.string().url().optional(),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  customDomain: z.string().optional()
 });
 
 export const addMemberSchema = z.object({
