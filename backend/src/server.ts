@@ -7,6 +7,7 @@ import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { bootstrap } from "./bootstrap";
 import { swaggerSpec } from "./config/swagger";
+import "./workers"; // Initialize background workers
 
 const app = express();
 const port = 3000;

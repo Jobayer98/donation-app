@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { ApiError } from "../utils/ApiError";
-import { sendDonationReceipt, sendDonationNotification } from "../utils/email";
+import { addEmailJob } from "../jobs/email.queue";
 import notificationService from "./notification.service";
 
 class DonationService {
@@ -133,36 +133,36 @@ class DonationService {
       },
     );
 
-    const emailPromises = [];
+    // Add email jobs to background queue
 
     // Send receipt to donor
     if (donation.donor && !donation.isAnonymous) {
-      emailPromises.push(
-        sendDonationReceipt(
-          donation.donor.email,
-          donation.donor.name,
-          Number(donation.amount),
-          "BDT", // Assuming BDT as per previous context or fallback to config if available
-          donation.campaign.title,
+      await addEmailJob({
+        type: 'DONATION_RECEIPT',
+        email: donation.donor.email,
+        payload: {
+          donorName: donation.donor.name,
+          amount: Number(donation.amount),
+          currency: "BDT",
+          campaignTitle: donation.campaign.title,
           transactionId,
-        ),
-      );
+        }
+      });
     }
 
     // Send notification to fundraiser
-    emailPromises.push(
-      sendDonationNotification(
-        donation.campaign.user.email,
-        donation.campaign.user.name,
-        donation.donor?.name || "Anonymous",
-        Number(donation.amount),
-        "BDT",
-        donation.campaign.title,
-        donation.isAnonymous,
-      ),
-    );
-
-    await Promise.all(emailPromises);
+    await addEmailJob({
+      type: 'DONATION_NOTIFICATION',
+      email: donation.campaign.user.email,
+      payload: {
+        fundraiserName: donation.campaign.user.name,
+        donorName: donation.donor?.name || "Anonymous",
+        amount: Number(donation.amount),
+        currency: "BDT",
+        campaignTitle: donation.campaign.title,
+        isAnonymous: donation.isAnonymous,
+      }
+    });
   }
 }
 

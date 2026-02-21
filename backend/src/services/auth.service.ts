@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma";
 import { loginDTO, registerDonorDTO, registerFundraiserDTO } from "../schema/auth.shcema";
 import { hashPassword, verifyPassword } from "../utils/auth";
 import { generateAccessToken } from "../utils/jwt";
-import { sendVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } from "../utils/email";
+import { addEmailJob } from "../jobs/email.queue";
 import crypto from "crypto";
 import { ApiError } from "../utils/ApiError";
 
@@ -16,11 +16,14 @@ class AuthService {
     }
 
     private async register(data: { name: string; email: string; password: string; role: 'DONOR' | 'FUND_RAISER' }) {
+        console.time("Registration Hash");
         const hashPass = await hashPassword(data.password);
+        console.timeEnd("Registration Hash");
         if (!hashPass) throw new Error("Error hashing password");
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
+        console.time("DB User Create");
         const user = await prisma.user.create({
             data: {
                 name: data.name,
@@ -31,11 +34,13 @@ class AuthService {
             },
             select: { id: true, role: true, email: true, name: true }
         });
+        console.timeEnd("DB User Create");
 
         // Auto-subscribe fundraisers to free plan
         if (data.role === 'FUND_RAISER') {
+            console.time("DB Subscription");
             const freePlan = await prisma.plan.findUnique({ where: { type: 'FREE' } });
-            
+
             if (freePlan) {
                 const now = new Date();
                 const endDate = new Date(now);
@@ -51,12 +56,24 @@ class AuthService {
                     }
                 });
             }
+            console.timeEnd("DB Subscription");
         }
 
+        // Add email jobs to background queue in parallel
+        console.time("Queue Jobs");
         await Promise.all([
-            sendWelcomeEmail(user.email, user.name),
-            sendVerificationEmail(user.email, user.name, verificationToken)
-        ]);
+            addEmailJob({
+                type: 'WELCOME',
+                email: user.email,
+                payload: { name: user.name }
+            }),
+            addEmailJob({
+                type: 'VERIFICATION',
+                email: user.email,
+                payload: { name: user.name, token: verificationToken }
+            })
+        ]).catch(err => console.error("⚠️ Failed to queue emails:", err));
+        console.timeEnd("Queue Jobs");
 
         const token = generateAccessToken({ id: user.id, role: user.role });
         return { id: user.id, token, message: "Please check your email to verify your account" };
@@ -111,7 +128,11 @@ class AuthService {
             data: { resetToken, resetTokenExpiry }
         });
 
-        await sendPasswordResetEmail(email, user.name, resetToken);
+        await addEmailJob({
+            type: 'PASSWORD_RESET',
+            email,
+            payload: { name: user.name, token: resetToken }
+        });
 
         return { message: "If email exists, reset link sent" };
     }
