@@ -2,14 +2,13 @@ import { z } from "zod";
 
 export const createPlanSchema = z.object({
   name: z.string().min(1, "Plan name is required"),
-  type: z.enum(["FREE", "PRO", "ENTERPRISE"]),
+  type: z.enum(["FREE", "PRO"]),
   price: z.number().min(0, "Price must be positive"),
-  interval: z.string().default("month"),
+  interval: z.enum(["MONTHLY", "YEARLY"]),
   features: z.record(z.string(), z.string()),
   limits: z.object({
     maxCampaigns: z.number(),
-    maxPaymentProviders: z.number(),
-    transactionFee: z.number()
+    maxPaymentProviders: z.number()
   }),
   isActive: z.boolean().optional()
 });

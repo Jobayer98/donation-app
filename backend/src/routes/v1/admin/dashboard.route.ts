@@ -249,6 +249,12 @@ router.get("/plans", getAllPlans);
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PlanSchema'
  *     responses:
  *       200:
  *         description: Success
@@ -291,6 +297,12 @@ router.post("/plans", validateBody(createPlanSchema), createPlan);
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PlanSchema'
  *     responses:
  *       200:
  *         description: Success

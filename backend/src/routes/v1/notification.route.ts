@@ -22,12 +22,6 @@ router.use(appRateLimit, isAuthenticated);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:
@@ -64,12 +58,6 @@ router.get("/", getNotifications);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:
@@ -100,12 +88,6 @@ router.put("/:id/read", markAsRead);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:
@@ -142,12 +124,6 @@ router.put("/read-all", markAllAsRead);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:
@@ -178,12 +154,6 @@ router.delete("/:id", deleteNotification);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:

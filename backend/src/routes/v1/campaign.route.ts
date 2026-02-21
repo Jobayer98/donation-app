@@ -23,8 +23,8 @@ router.use(appRateLimit);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
+ *       404:
+ *         description: Not Found
  *         content:
  *           application/json:
  *             schema:
@@ -57,12 +57,6 @@ router.get("/active", findActiveCampaign);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:
@@ -97,12 +91,6 @@ router.get("/:id", findOneCampaign);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:

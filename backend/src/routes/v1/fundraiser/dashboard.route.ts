@@ -350,7 +350,7 @@ router.get("/campaigns/:id/stats", getCampaignStats);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreatePaymentProviderSchema'
+ *             $ref: '#/components/schemas/PaymentProviderSchema'
  *     responses:
  *       200:
  *         description: Success
@@ -432,7 +432,7 @@ router.get("/payment-providers", getMyPaymentProviders);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdatePaymentProviderSchema'
+ *             $ref: '#/components/schemas/PaymentProviderSchema'
  *     responses:
  *       200:
  *         description: Success

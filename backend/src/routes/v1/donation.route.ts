@@ -64,8 +64,8 @@ router.use(appRateLimit, isAuthenticated, authorize("DONOR"));
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
+ *       404:
+ *         description: Not Found
  *         content:
  *           application/json:
  *             schema:
@@ -94,8 +94,8 @@ router.get("/overview", getUserDonationOverview);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
+ *       404:
+ *         description: Not Found
  *         content:
  *           application/json:
  *             schema:
@@ -130,12 +130,6 @@ router.get("/me", findMyDonations);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
  *       404:
  *         description: Not Found
  *         content:

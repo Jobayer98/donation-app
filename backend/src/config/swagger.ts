@@ -48,17 +48,6 @@ const swaggerDefinition: SwaggerDefinition = {
                     message: {
                         type: 'string',
                     },
-                    errors: {
-                        type: 'array',
-                        items: {
-                            type: 'object',
-                            properties: {
-                                message: {
-                                    type: 'string',
-                                },
-                            },
-                        },
-                    },
                 },
             },
 
@@ -244,10 +233,108 @@ const swaggerDefinition: SwaggerDefinition = {
                     },
                     config: {
                         type: 'object',
+                        properties: {
+                            apiKey: {
+                                type: 'string',
+                            },
+                            secretKey: {
+                                type: 'string',
+                            }
+                        },
                     },
                 },
             },
 
+            // Update Onboarding Schema
+            UpdateOnboardingStepSchema: {
+                type: 'object',
+                properties: {
+                    step: {
+                        type: 'string',
+                    },
+                },
+            },
+
+            // Add member schema
+            AddMemberSchema: {
+                type: 'object',
+                properties: {
+                    email: {
+                        type: 'string',
+                    },
+                    role: {
+                        type: 'string',
+                    },
+                },
+            },
+
+            // Update member role schema
+            UpdateMemberRoleSchema: {
+                type: 'object',
+                properties: {
+                    role: {
+                        type: 'string',
+                    },
+                },
+            },
+
+            // Subscribe schema
+            SubscribeSchema: {
+                type: 'object',
+                properties: {
+                    planId: {
+                        type: 'string',
+                    },
+                },
+            },
+
+            // Cancel subscription schema
+            CancelSubscriptionSchema: {
+                type: 'object',
+                properties: {
+                    planId: {
+                        type: 'string',
+                    },
+                },
+            },
+
+            // Plan Schema
+            PlanSchema: {
+                type: 'object',
+                properties: {
+                    name: {
+                        type: 'string',
+                    },
+                    price: {
+                        type: 'string',
+                    },
+                    type: {
+                        type: 'enum',
+                        enum: ['FREE', 'PRO'],
+                    },
+                    interval: {
+                        type: 'enum',
+                        enum: ['MONTHLY', 'YEARLY'],
+                    },
+                    features: {
+                        type: 'object',
+                    },
+                    limits: {
+                        type: 'object',
+                        properties: {
+                            maxCampaigns: {
+                                type: 'number',
+                            },
+                            maxPaymentProviders: {
+                                type: 'number',
+                            }
+                        },
+                    },
+                    isActive: {
+                        type: 'boolean',
+                    },
+                },
+            },
 
         }
     },

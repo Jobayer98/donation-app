@@ -22,10 +22,10 @@ export const subscribe = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-export const cancelSubscription = asyncHandler(async (req: Request, res: Response) => {
-  await subscriptionService.cancelSubscription(req.user!.id);
-  res.json({
-    success: true,
-    message: "Subscription will be canceled at period end"
-  });
-});
+// export const cancelSubscription = asyncHandler(async (req: Request, res: Response) => {
+//   await subscriptionService.cancelSubscription(req.user!.id);
+//   res.json({
+//     success: true,
+//     message: "Subscription will be canceled at period end"
+//   });
+// });
