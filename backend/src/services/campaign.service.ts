@@ -75,7 +75,7 @@ class CampaignService {
                 status: true,
                 goalAmount: true,
                 raisedAmount: true,
-                _count: { select: { donations: true } }
+                _count: { select: { donations: { where: { status: "SUCCESS" } } } }
             }
         });
     }

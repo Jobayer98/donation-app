@@ -7,6 +7,7 @@ import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { bootstrap } from "./bootstrap";
 import { swaggerSpec } from "./config/swagger";
+import { metricsMiddleware, getMetrics } from "./middlewares/metrics.middleware";
 import "./workers"; // Initialize background workers
 
 const app = express();
@@ -15,6 +16,7 @@ const port = 3000;
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(metricsMiddleware);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -30,6 +32,8 @@ app.get("/cancel", (req, res) => {
 app.get("/failed", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/failed.html"));
 });
+
+app.get("/api/metrics", getMetrics);
 
 app.use("/api", apiRoute);
 app.use(errorHandler);
