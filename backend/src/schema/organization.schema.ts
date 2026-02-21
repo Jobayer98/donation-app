@@ -14,7 +14,7 @@ export const updateOrganizationSchema = z.object({
 });
 
 export const addMemberSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   role: z.enum(["ADMIN", "MEMBER"]),
 });
 

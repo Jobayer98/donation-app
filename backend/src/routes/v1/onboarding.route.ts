@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { completeOnboarding, getOnboardingStatus, skipOnboarding, updateOnboardingStep } from "../../controllers/onboarding.controller";
 import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
+import { appRateLimit } from "../../middlewares/rateLimit.middleware";
 
 const router = Router();
 
-router.use(isAuthenticated, authorize("FUND_RAISER"));
+router.use(appRateLimit, isAuthenticated, authorize("FUND_RAISER"));
 
 router.get("/status", getOnboardingStatus);
 router.post("/step", updateOnboardingStep);

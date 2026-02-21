@@ -14,7 +14,7 @@ export const RegisterFundraiserSchema = z.object({
 
 export const LoginSchema = z.object({
   email: z.email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(100),
 });
 
 export type registerDonorDTO = z.infer<typeof RegisterDonorSchema>;

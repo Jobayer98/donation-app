@@ -1,27 +1,12 @@
 import express from "express";
 import { initializeSocket } from "./utils/socket";
 import swaggerUi from 'swagger-ui-express';
-import swaggerJSDoc from "swagger-jsdoc"
 
 import path from "path";
 import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { bootstrap } from "./bootstrap";
-
-
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Donation App API',
-      version: '1.0.0',
-      description: 'API for donation management',
-    },
-  },
-  apis: ['./src/routes/v1/*.ts', './src/routes/v1/**/*.ts'],
-};
-
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+import { swaggerSpec } from "./config/swagger";
 
 const app = express();
 const port = 3000;
