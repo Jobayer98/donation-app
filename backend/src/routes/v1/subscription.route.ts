@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCurrentSubscription, getPlans, subscribe } from "../../controllers/subscription.controller";
+import { getCurrentSubscription, getPlans, subscribe, handleSuccess, cancelSubscription } from "../../controllers/subscription.controller";
 import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
 import { appRateLimit } from "../../middlewares/rateLimit.middleware";
 import { validateBody } from "../../middlewares/validate.middleware";
@@ -99,6 +99,34 @@ router.post("/subscribe", isAuthenticated, authorize("FUND_RAISER"), validateBod
 
 /**
  * @openapi
+ * /api/v1/subscriptions/success:
+ *   get:
+ *     summary: Subscription success
+ *     tags: [Subscription]
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/success", handleSuccess);
+
+/**
+ * @openapi
  * /api/v1/subscriptions/cancel:
  *   post:
  *     summary: Cancel subscription
@@ -112,8 +140,8 @@ router.post("/subscribe", isAuthenticated, authorize("FUND_RAISER"), validateBod
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
+ *       404:
+ *         description: Not Found
  *         content:
  *           application/json:
  *             schema:
@@ -125,6 +153,6 @@ router.post("/subscribe", isAuthenticated, authorize("FUND_RAISER"), validateBod
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-// router.post("/cancel", isAuthenticated, authorize("FUND_RAISER"), cancelSubscription);
+router.post("/cancel", isAuthenticated, authorize("FUND_RAISER"), cancelSubscription);
 
 export default router;
