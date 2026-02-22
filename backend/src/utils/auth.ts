@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import logger from "./logger";
 
 const saltRounds = 10;
 
@@ -9,7 +10,7 @@ export async function hashPassword(
     const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
     return hashedPassword;
   } catch (error) {
-    console.error("Error hashing password:", error);
+    logger.error("Error hashing password:", error);
   }
 }
 

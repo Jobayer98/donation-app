@@ -5,6 +5,7 @@ import { generateAccessToken } from "../utils/jwt";
 import { addEmailJob } from "../jobs/email.queue";
 import crypto from "crypto";
 import { ApiError } from "../utils/ApiError";
+import logger from "../utils/logger";
 
 class AuthService {
     async registerDonor(data: registerDonorDTO) {
@@ -16,14 +17,11 @@ class AuthService {
     }
 
     private async register(data: { name: string; email: string; password: string; role: 'DONOR' | 'FUND_RAISER' }) {
-        console.time("Registration Hash");
         const hashPass = await hashPassword(data.password);
-        console.timeEnd("Registration Hash");
         if (!hashPass) throw new Error("Error hashing password");
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
-        console.time("DB User Create");
         const user = await prisma.user.create({
             data: {
                 name: data.name,
@@ -34,11 +32,11 @@ class AuthService {
             },
             select: { id: true, role: true, email: true, name: true }
         });
-        console.timeEnd("DB User Create");
+
 
         // Auto-subscribe fundraisers to free plan
         if (data.role === 'FUND_RAISER') {
-            console.time("DB Subscription");
+
             const freePlan = await prisma.plan.findUnique({ where: { type: 'FREE' } });
 
             if (freePlan) {
@@ -56,11 +54,11 @@ class AuthService {
                     }
                 });
             }
-            console.timeEnd("DB Subscription");
+
         }
 
         // Add email jobs to background queue in parallel
-        console.time("Queue Jobs");
+
         await Promise.all([
             addEmailJob({
                 type: 'WELCOME',
@@ -72,8 +70,7 @@ class AuthService {
                 email: user.email,
                 payload: { name: user.name, token: verificationToken }
             })
-        ]).catch(err => console.error("⚠️ Failed to queue emails:", err));
-        console.timeEnd("Queue Jobs");
+        ]).catch(err => logger.error("⚠️ Failed to queue emails:", err));
 
         const token = generateAccessToken({ id: user.id, role: user.role });
         return { id: user.id, token, message: "Please check your email to verify your account" };

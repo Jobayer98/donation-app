@@ -26,7 +26,8 @@ The application follows a modular architecture designed for scalability and main
 
 - **RESTful API**: Clean separation of concerns with Controllers, Services, and Routes.
 - **Asynchronous Processing**: Background jobs (via BullMQ) handle time-consuming tasks like sending emails (Welcome, Verification, Receipts) without blocking the main event loop.
-- **Micro-services Monitoring**: Integrated Prometheus metrics scraping and Grafana dashboards for real-time observability.
+- **Monitoring**: Integrated Prometheus metrics scraping and Grafana dashboards for real-time observability.
+- **Logging**: Integrated Winston logger for real-time logging.
 - **Real-time Layer**: Socket.io for live notifications and campaign updates.
 - **Infrastructure**: Fully Dockerized environment for consistent development and deployment.
 

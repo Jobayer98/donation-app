@@ -1,5 +1,6 @@
 import { prisma } from "./lib/prisma";
 import { hashPassword } from "./utils/auth";
+import logger from "./utils/logger";
 
 export async function bootstrap() {
   try {
@@ -13,7 +14,7 @@ export async function bootstrap() {
 
     if (!existingAdmin) {
       const hashedPassword = await hashPassword(adminPassword);
-      
+
       await prisma.user.create({
         data: {
           name: "System Admin",
@@ -24,12 +25,12 @@ export async function bootstrap() {
         }
       });
 
-      console.log("✅ Default admin created:");
-      console.log(`   Email: ${adminEmail}`);
-      console.log(`   Password: ${adminPassword}`);
-      console.log("   ⚠️  Please change the password after first login!");
+      logger.info("✅ Default admin created:");
+      logger.info(`   Email: ${adminEmail}`);
+      logger.info(`   Password: ${adminPassword}`);
+      logger.info("   ⚠️  Please change the password after first login!");
     }
   } catch (error) {
-    console.error("❌ Bootstrap error:", error);
+    logger.error("❌ Bootstrap error:", error);
   }
 }

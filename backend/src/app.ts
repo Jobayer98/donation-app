@@ -1,6 +1,7 @@
 import express from "express";
 import swaggerUi from 'swagger-ui-express';
 import path from "path";
+import { requestLogger } from "./middlewares/requestLogger.middleware";
 import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { swaggerSpec } from "./config/swagger";
@@ -9,6 +10,7 @@ import { metricsMiddleware, getMetrics } from "./middlewares/metrics.middleware"
 const app = express();
 
 // Middlewares
+app.use(requestLogger);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

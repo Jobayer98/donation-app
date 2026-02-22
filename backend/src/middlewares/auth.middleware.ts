@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
+import logger from "../utils/logger";
 
 declare global {
   namespace Express {
@@ -41,7 +42,7 @@ export function isAuthenticated(
 
     next();
   } catch (error) {
-    console.log(error);
+    logger.error("Authentication Error:", error);
     res.status(401).json({ message: "Authentication failed" });
   }
 }
@@ -52,9 +53,8 @@ export function authorize(...roles: string[]) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    console.log(req.user)
-
     if (!roles.includes(req.user.role)) {
+      logger.warn(`Forbidden access attempt by user ${req.user.id} with role ${req.user.role}. Required roles: ${roles.join(", ")}`);
       return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
     }
 

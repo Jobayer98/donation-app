@@ -2,6 +2,7 @@ import { Server as HTTPServer } from "http";
 import { Server as SocketIOServer, Socket, ExtendedError } from "socket.io";
 import { verifyToken } from "./jwt";
 import { ApiError } from "./ApiError";
+import logger from "./logger";
 
 let io: SocketIOServer;
 
@@ -35,10 +36,10 @@ export const initializeSocket = (server: HTTPServer) => {
     // Join user's personal room
     socket.join(`user:${userId}`);
 
-    console.log(`User ${userId} connected`);
+    logger.info(`User ${userId} connected via socket`);
 
     socket.on("disconnect", () => {
-      console.log(`User ${userId} disconnected`);
+      logger.info(`User ${userId} disconnected from socket`);
     });
   });
 

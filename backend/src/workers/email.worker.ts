@@ -2,13 +2,14 @@ import { Worker, Job } from 'bullmq';
 import { redisConfig } from '../config/redis';
 import { EMAIL_QUEUE, EmailJobData } from '../jobs/email.queue';
 import * as emailUtils from '../utils/email';
+import logger from '../utils/logger';
 
 export const emailWorker = new Worker(
     EMAIL_QUEUE,
     async (job: Job<EmailJobData>) => {
         const { type, email, payload } = job.data;
 
-        console.log(`Processing email job: ${type} to ${email}`);
+        logger.info(`Processing email job: ${type} to ${email}`);
 
         try {
             switch (type) {
@@ -44,7 +45,7 @@ export const emailWorker = new Worker(
                     break;
             }
         } catch (error) {
-            console.error(`Failed to send email ${type} to ${email}:`, error);
+            logger.error(`Failed to send email ${type} to ${email}:`, error);
             throw error; // Rethrow to let BullMQ handle retries
         }
     },
@@ -55,9 +56,9 @@ export const emailWorker = new Worker(
 );
 
 emailWorker.on('completed', (job) => {
-    console.log(`Email job ${job.id} completed successfully`);
+    logger.info(`Email job ${job.id} completed successfully`);
 });
 
 emailWorker.on('failed', (job, err) => {
-    console.log(`Email job ${job?.id} failed with error: ${err.message}`);
+    logger.error(`Email job ${job?.id} failed with error: ${err.message}`);
 });
