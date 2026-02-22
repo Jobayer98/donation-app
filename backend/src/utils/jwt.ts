@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { appConfig } from "../config/config";
 
 type tokenPayload = {
   id: string;
@@ -6,9 +7,9 @@ type tokenPayload = {
 };
 
 export function generateAccessToken(payload: tokenPayload): string {
-  const token = jwt.sign({ ...payload }, "mysecret", {
+  const token = jwt.sign({ ...payload }, appConfig.jwt_secret, {
     algorithm: "HS256",
-    expiresIn: "1d",
+    expiresIn: appConfig.jwt_expires_in as any,
   });
 
   return token;
@@ -16,7 +17,7 @@ export function generateAccessToken(payload: tokenPayload): string {
 
 export function verifyToken(token: string) {
   try {
-    const decoded = jwt.verify(token, "mysecret") as {
+    const decoded = jwt.verify(token, appConfig.jwt_secret) as {
       id: string;
       role: string;
     };

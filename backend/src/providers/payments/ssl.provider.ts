@@ -1,5 +1,5 @@
 import axios from "axios";
-import { appConfig } from "../../lib/config";
+import { appConfig } from "../../config/config";
 import { PaymentInfo } from "../../types/payment.type";
 import { IPaymentProvider } from "./base.provider";
 import donationService from "../../services/donation.service";

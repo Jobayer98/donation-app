@@ -7,6 +7,8 @@ export const appConfig = {
     node_env: process.env.NODE_ENV,
     base_url: process.env.BASE_URL,
     database_url: process.env.DATABASE_URL,
+    jwt_secret: process.env.JWT_SECRET || "mysecret",
+    jwt_expires_in: process.env.JWT_EXPIRES_IN || "1d",
 }
 
 // payment config
