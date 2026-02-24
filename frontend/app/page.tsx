@@ -1,12 +1,19 @@
-import { Button } from "@/components/ui/button";
+import Header from "@/components/donor/Header";
+import HeroSection from "@/components/donor/HeroSection";
+import StatsBar from "@/components/donor/StatsBar";
+import CampaignList from "@/components/donor/CampaignList";
+import Footer from "@/components/public-profile/Footer";
 
-export default function Home() {
+export default function PublicHomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <h1 className="text-4xl font-bold text-center dark:text-white sm:text-left">
-        Welcome to Repomap
-      </h1>
-      <Button className="mt-4">Click Me</Button>
-    </div>
+    <main className="min-h-screen bg-white flex flex-col">
+      <Header />
+      <div className="flex-1">
+        <HeroSection />
+        <StatsBar />
+        <CampaignList />
+      </div>
+      <Footer />
+    </main>
   );
 }
