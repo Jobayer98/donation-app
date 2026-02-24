@@ -9,18 +9,18 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+# RUN npm run build
 
 # Stage 2: Production
-FROM node:20-alpine
+# FROM node:20-alpine
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/.env ./.env
+# COPY --from=build /app/package*.json ./
+# COPY --from=build /app/node_modules ./node_modules
+# COPY --from=build /app/dist ./dist
+# COPY --from=build /app/.env ./.env
 
-EXPOSE 3000
+EXPOSE 4000
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run dev"]
