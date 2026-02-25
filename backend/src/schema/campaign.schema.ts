@@ -10,6 +10,8 @@ export const CreateCampaignSchema = z
     type: z.enum(["donation", "crowdfunding"], {
       message: "Type must be 'donation' or 'crowdfunding'",
     }),
+    imageUrl:
+      z.url("Invalid image URL format").optional(),
     goalAmount: z.number().positive("Goal amount must be positive"),
     startDate: z.iso.datetime("Invalid start date format"),
     endDate: z.iso.datetime("Invalid end date format"),

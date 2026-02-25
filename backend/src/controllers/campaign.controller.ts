@@ -114,6 +114,7 @@ export const fundraiserCampaigns = asyncHandler(
         goalAmount: c.goalAmount,
         raisedAmount: c.raisedAmount,
         donorCount: c._count.donations,
+        createdAt: c.createdAt,
       })),
     });
   },

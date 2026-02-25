@@ -3,6 +3,7 @@ import { createCampaignDTO } from "../schema/campaign.schema";
 
 class CampaignService {
     async create(data: createCampaignDTO, fundraiserId: string) {
+        console.log(data);
         return prisma.campaign.create({
             data: {
                 ...data,
@@ -75,6 +76,7 @@ class CampaignService {
                 status: true,
                 goalAmount: true,
                 raisedAmount: true,
+                createdAt: true,
                 _count: { select: { donations: { where: { status: "SUCCESS" } } } }
             }
         });

@@ -6,10 +6,12 @@ import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { swaggerSpec } from "./config/swagger";
 import { metricsMiddleware, getMetrics } from "./middlewares/metrics.middleware";
+import cors from "cors";
 
 const app = express();
 
 // Middlewares
+app.use(cors());
 app.use(requestLogger);
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));

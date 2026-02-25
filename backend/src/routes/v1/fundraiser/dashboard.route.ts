@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { closeCampaign, createCampaign, fundraiserCampaigns, fundraiserOverview, getCampaignDonations, getCampaignStats, publishCampaign, updateCampaign } from "../../../controllers/campaign.controller";
+import { closeCampaign, createCampaign, fundraiserCampaigns, fundraiserOverview, getCampaignDonations, getCampaignStats, publishCampaign, updateCampaign, findOneCampaign } from "../../../controllers/campaign.controller";
 import { createPaymentProvider, deletePaymentProvider, getMyPaymentProviders, setDefaultProvider, togglePaymentProvider, updatePaymentProvider } from "../../../controllers/paymentProvider.controller";
 import { isAuthenticated, authorize } from "../../../middlewares/auth.middleware";
 import { requireVerified } from "../../../middlewares/verification.middleware";
@@ -255,6 +255,47 @@ router.get("/overview", fundraiserOverview);
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
 router.get("/campaigns", fundraiserCampaigns);
+/**
+ * @openapi
+ * /api/v1/dashboard/fundraiser/campaigns/{id}:
+ *   get:
+ *     summary: Get fundraiser campaign
+ *     tags: [Fundraiser]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/campaigns/:id", findOneCampaign);
 /**
  * @openapi
  * /api/v1/dashboard/fundraiser/campaigns/{id}/donations:
