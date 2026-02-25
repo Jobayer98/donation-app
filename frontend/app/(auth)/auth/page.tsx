@@ -16,25 +16,96 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Heart, HandHeart, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import {
+  loginSchema,
+  signupSchema,
+  LoginSchemaType,
+  SignupSchemaType,
+} from "@/lib/validators/auth";
+import api from "@/lib/axios";
+import { AxiosError } from "axios";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [loginData, setLoginData] = useState<LoginSchemaType>({
+    email: "",
+    password: "",
+  });
+  const [signupData, setSignupData] = useState<SignupSchemaType>({
+    name: "",
+    email: "",
+    password: "",
+    terms: false,
+  });
   const router = useRouter();
 
-  const handleAuth = (e: React.SubmitEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setLoginError(null);
+
+    const validation = loginSchema.safeParse(loginData);
+    if (!validation.success) {
+      setLoginError(validation.error.issues[0].message);
       setIsLoading(false);
-      router.push("/dashboard");
-    }, 1500);
+      return;
+    }
+
+    try {
+      const res = await api.post("/auth/login", loginData);
+      console.log(res.data);
+      if (res.status === 200) {
+        localStorage.setItem("token", res.data.token);
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.error("Login error:", axiosError);
+      setLoginError(
+        axiosError.response?.data?.message ||
+          "Invalid credentials. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setSignupError(null);
+
+    const validation = signupSchema.safeParse(signupData);
+    if (!validation.success) {
+      setSignupError(validation.error.issues[0].message);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await api.post("/auth/register/donor", signupData);
+      if (res.status === 200 || res.status === 201) {
+        localStorage.setItem("token", res.data.token);
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      console.error("Signup error:", axiosError);
+      setSignupError(
+        axiosError.response?.data?.message ||
+          "Signup failed. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row">
       {/* Left Side - Hero Section */}
-      <div className="relative hidden md:flex md:w-1/2 lg:w-3/5 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 flex-col justify-between p-10">
+      <div className="relative hidden md:flex md:w-1/2 lg:w-3/5 bg-linear-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 flex-col justify-between p-10">
         <div className="flex items-center gap-2 text-green-700">
           <Heart className="h-6 w-6 fill-current" />
           <span className="text-xl font-bold">GiveFlow</span>
@@ -112,6 +183,11 @@ export default function AuthPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {loginError && (
+                    <div className="p-3 text-sm text-red-500 bg-red-100 border border-red-200 rounded-md">
+                      {loginError}
+                    </div>
+                  )}
                   <form onSubmit={handleAuth}>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -121,6 +197,13 @@ export default function AuthPage() {
                           type="email"
                           placeholder="you@example.com"
                           required
+                          value={loginData.email}
+                          onChange={(e) =>
+                            setLoginData({
+                              ...loginData,
+                              email: e.target.value,
+                            })
+                          }
                           className="border-gray-200 focus:border-green-500 focus:ring-green-500"
                         />
                       </div>
@@ -138,6 +221,13 @@ export default function AuthPage() {
                           id="password"
                           type="password"
                           required
+                          value={loginData.password}
+                          onChange={(e) =>
+                            setLoginData({
+                              ...loginData,
+                              password: e.target.value,
+                            })
+                          }
                           className="border-gray-200 focus:border-green-500 focus:ring-green-500"
                         />
                       </div>
@@ -184,14 +274,26 @@ export default function AuthPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <form onSubmit={handleAuth}>
+                  {signupError && (
+                    <div className="p-3 text-sm text-red-500 bg-red-100 border border-red-200 rounded-md">
+                      {signupError}
+                    </div>
+                  )}
+                  <form onSubmit={handleSignup}>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="org-name">Organization Name</Label>
+                        <Label htmlFor="name">Name</Label>
                         <Input
-                          id="org-name"
+                          id="name"
                           placeholder="Charity Inc."
                           required
+                          value={signupData.name}
+                          onChange={(e) =>
+                            setSignupData({
+                              ...signupData,
+                              name: e.target.value,
+                            })
+                          }
                           className="border-gray-200 focus:border-green-500 focus:ring-green-500"
                         />
                       </div>
@@ -202,6 +304,13 @@ export default function AuthPage() {
                           type="email"
                           placeholder="contact@charity.org"
                           required
+                          value={signupData.email}
+                          onChange={(e) =>
+                            setSignupData({
+                              ...signupData,
+                              email: e.target.value,
+                            })
+                          }
                           className="border-gray-200 focus:border-green-500 focus:ring-green-500"
                         />
                       </div>
@@ -211,11 +320,28 @@ export default function AuthPage() {
                           id="signup-password"
                           type="password"
                           required
+                          value={signupData.password}
+                          onChange={(e) =>
+                            setSignupData({
+                              ...signupData,
+                              password: e.target.value,
+                            })
+                          }
                           className="border-gray-200 focus:border-green-500 focus:ring-green-500"
                         />
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" />
+                        <Checkbox
+                          id="terms"
+                          className="data-[state=checked]:border-green-600 data-[state=checked]:bg-green-600"
+                          checked={signupData.terms}
+                          onCheckedChange={(checked) =>
+                            setSignupData({
+                              ...signupData,
+                              terms: checked === true,
+                            })
+                          }
+                        />
                         <label
                           htmlFor="terms"
                           className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
