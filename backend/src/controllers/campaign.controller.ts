@@ -100,8 +100,15 @@ export const fundraiserOverview = asyncHandler(
 
 export const fundraiserCampaigns = asyncHandler(
   async (req: Request, res: Response) => {
+    let { status } = req.query;
+    if (status === "undefined") {
+      status = undefined;
+    }
+
+    console.log(status)
     const campaigns = await campaignService.getFundraiserCampaigns(
       req.user!.id,
+      status as string
     );
 
     res.json({
@@ -133,10 +140,39 @@ export const getCampaignDonations = asyncHandler(
       data: donations.map((d) => ({
         id: d.id,
         amount: d.amount,
-        donorName: d.donor?.name,
+        donorName: d.donor?.name ?? "Anonymous",
         status: d.status,
         createdAt: d.createdAt,
       })),
+    });
+  },
+);
+
+export const getAllDonations = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { page = 1, limit = 10 } = req.query;
+    const { donations, pagination, totalDonors, totalDonationThisMonth, totalDonationCountThisMonth } = await campaignService.getAllDonations(
+      String(req.user!.id),
+      Number(page),
+      Number(limit),
+    );
+
+    // return with pagination
+    res.json({
+      success: true,
+      message: "Donations retrieved successfully",
+      data: {
+        donations: donations.map((d) => ({
+          id: d.id,
+          amount: d.amount,
+          donorName: d.donor?.name ?? "Anonymous",
+          createdAt: d.createdAt,
+        })),
+        totalDonors,
+        totalDonationThisMonth,
+        totalDonationCountThisMonth,
+        pagination,
+      },
     });
   },
 );
@@ -155,3 +191,22 @@ export const getCampaignStats = asyncHandler(
     });
   },
 );
+
+export const getTopCampaigns = asyncHandler(
+  async (req: Request, res: Response) => {
+    const campaigns = await campaignService.getTopCampaigns();
+
+    console.log(campaigns);
+
+    res.json({
+      success: true,
+      message: "Top campaigns retrieved successfully",
+      data: campaigns.map((c) => ({
+        id: c.id,
+        title: c.title,
+        raisedAmount: c.raisedAmount,
+        donorCount: c.donations.length,
+      })),
+    });
+  });
+

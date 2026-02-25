@@ -8,18 +8,18 @@ class PaymentProviderService {
     // Validate credentials before saving
     await this.validateCredentials(name, config);
 
-    const encryptedConfig = encrypt(JSON.stringify(config));
-    
+    const encryptedConfig: any = encrypt(JSON.stringify(config));
+
     // Check if this is the first provider for the fundraiser
     const existingCount = await prisma.paymentProvider.count({
       where: { fundRaiserId }
     });
 
     return prisma.paymentProvider.create({
-      data: { 
-        name, 
-        config: encryptedConfig, 
-        fundRaiserId, 
+      data: {
+        name,
+        config: encryptedConfig,
+        fundRaiserId,
         currency,
         isDefault: existingCount === 0 // First provider is default
       },
@@ -197,10 +197,10 @@ class PaymentProviderService {
   private async validateSSLCommerz(config: any): Promise<void> {
     try {
       // Validate by making a test API call
-      const testUrl = config.is_live 
+      const testUrl = config.is_live
         ? 'https://securepay.sslcommerz.com/validator/api/validationserverAPI.php'
         : 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php';
-      
+
       // Just check if credentials format is valid
       if (config.api_key.length < 10 || config.secret_key.length < 10) {
         throw new ApiError(400, "Invalid SSLCommerz credentials format");

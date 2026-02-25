@@ -67,9 +67,12 @@ class CampaignService {
         return { totalCampaigns, activeCampaigns, totalRaised, totalDonors };
     }
 
-    async getFundraiserCampaigns(fundraiserId: string) {
+    async getFundraiserCampaigns(fundraiserId: string, status?: string) {
         return prisma.campaign.findMany({
-            where: { fundraiserId },
+            where: {
+                fundraiserId,
+                ...(status && status !== "ALL" ? { status: status as any } : {})
+            },
             select: {
                 id: true,
                 title: true,
@@ -102,6 +105,54 @@ class CampaignService {
         return campaign?.donations || [];
     }
 
+    async getAllDonations(fundraiserId: string, page: number, limit: number) {
+        const where = {
+            campaign: {
+                fundraiserId
+            },
+        };
+
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const [donations, total, monthStats] = await Promise.all([
+            prisma.donation.findMany({
+                skip: (page - 1) * limit,
+                take: limit,
+                where,
+                orderBy: { createdAt: "desc" },
+                select: {
+                    id: true,
+                    amount: true,
+                    createdAt: true,
+                    donor: { select: { name: true } }
+                }
+            }),
+            prisma.donation.count({ where }),
+            prisma.donation.aggregate({
+                where: {
+                    ...where,
+                    createdAt: { gte: startOfMonth },
+                    status: "SUCCESS"
+                },
+                _sum: {
+                    amount: true
+                },
+                _count: {
+                    _all: true
+                }
+            })
+        ]);
+
+        return {
+            donations,
+            totalDonors: total,
+            totalDonationThisMonth: monthStats._sum.amount || 0,
+            totalDonationCountThisMonth: monthStats._count._all,
+            pagination: { page, limit, total }
+        };
+    }
+
     async getCampaignStats(id: string, fundraiserId: string) {
         const campaign = await prisma.campaign.findUnique({
             where: { id, fundraiserId },
@@ -115,6 +166,20 @@ class CampaignService {
             totalRaised: Number(campaign?.raisedAmount || 0),
             totalDonations: campaign?._count.donations || 0
         };
+    }
+
+    async getTopCampaigns(limit: number = 4) {
+        return prisma.campaign.findMany({
+            where: { status: "ACTIVE" },
+            take: limit,
+            orderBy: { raisedAmount: "desc" },
+            select: {
+                id: true,
+                title: true,
+                raisedAmount: true,
+                donations: { where: { status: "SUCCESS" } }
+            }
+        });
     }
 }
 
