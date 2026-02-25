@@ -9,9 +9,9 @@ import {
   Megaphone,
   ArrowUpRight,
   ArrowDownRight,
-  Plus,
 } from "lucide-react";
 import Link from "next/link";
+import CreateCampaignModal from "@/components/fundraiser-dashboard/CreateCampaignModal";
 
 // Mock Data for Overview
 const stats = [
@@ -99,9 +99,8 @@ export default function FundraiserOverviewPage() {
             </Button>
           </Link>
 
-          <Button className="bg-green-600 hover:bg-green-700 gap-2 shadow-md shadow-green-200">
-            <Plus className="h-4 w-4" /> New Campaign
-          </Button>
+          {/* Replace the old button with the Modal Component */}
+          <CreateCampaignModal />
         </div>
       </div>
 

@@ -57,7 +57,7 @@ export default function AuthPage() {
       const res = await api.post("/auth/login", loginData);
       console.log(res.data);
       if (res.status === 200) {
-        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("token", res.data.data.token);
         router.push("/dashboard");
       }
     } catch (error) {
@@ -87,7 +87,7 @@ export default function AuthPage() {
     try {
       const res = await api.post("/auth/register/donor", signupData);
       if (res.status === 200 || res.status === 201) {
-        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("token", res.data.data.token);
         router.push("/dashboard");
       }
     } catch (error) {
