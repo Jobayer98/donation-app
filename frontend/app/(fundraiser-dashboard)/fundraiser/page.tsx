@@ -1,49 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DollarSign,
-  Users,
-  TrendingUp,
-  Megaphone,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+import { DollarSign, Users, Megaphone, Target } from "lucide-react";
 import Link from "next/link";
 import CreateCampaignModal from "@/components/fundraiser-dashboard/CreateCampaignModal";
+import api from "@/lib/axios";
 
-// Mock Data for Overview
-const stats = [
-  {
-    label: "Total Raised",
-    value: "$124,500",
-    change: "+12.5%",
-    trend: "up",
-    icon: DollarSign,
-  },
-  {
-    label: "Active Donors",
-    value: "1,240",
-    change: "+5.2%",
-    trend: "up",
-    icon: Users,
-  },
-  {
-    label: "Active Campaigns",
-    value: "8",
-    change: "0%",
-    trend: "neutral",
-    icon: Megaphone,
-  },
-  {
-    label: "Conversion Rate",
-    value: "3.2%",
-    change: "-0.5%",
-    trend: "down",
-    icon: TrendingUp,
-  },
-];
+interface OverviewStats {
+  totalCampaigns: number;
+  activeCampaigns: number;
+  totalRaised: number;
+  totalDonors: number;
+}
 
 const recentActivity = [
   {
@@ -80,6 +49,54 @@ const recentActivity = [
 ];
 
 export default function FundraiserOverviewPage() {
+  const [stats, setStats] = useState<OverviewStats>({
+    totalCampaigns: 0,
+    activeCampaigns: 0,
+    totalRaised: 0,
+    totalDonors: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadOverview = async () => {
+      try {
+        const res = await api.get("/dashboard/fundraiser/overview");
+        setStats(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch overview:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadOverview();
+  }, []);
+
+  const statsCards = [
+    {
+      label: "Total Raised",
+      value: `$${stats.totalRaised}`,
+      icon: DollarSign,
+      color: "green",
+    },
+    {
+      label: "Total Donors",
+      value: stats.totalDonors,
+      icon: Users,
+      color: "blue",
+    },
+    {
+      label: "Active Campaigns",
+      value: stats.activeCampaigns,
+      icon: Megaphone,
+      color: "purple",
+    },
+    {
+      label: "Total Campaigns",
+      value: stats.totalCampaigns,
+      icon: Target,
+      color: "orange",
+    },
+  ];
   return (
     <div className="p-6 lg:p-8 space-y-6">
       {/* Header Section */}
@@ -106,34 +123,28 @@ export default function FundraiserOverviewPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start mb-3">
-              <div className="p-2 bg-green-50 rounded-lg text-green-600">
-                <stat.icon className="h-5 w-5" />
-              </div>
-              {stat.change !== "0%" && (
-                <span
-                  className={`text-xs font-medium flex items-center gap-0.5 ${
-                    stat.trend === "up" ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {stat.trend === "up" ? (
-                    <ArrowUpRight className="h-3 w-3" />
-                  ) : (
-                    <ArrowDownRight className="h-3 w-3" />
-                  )}
-                  {stat.change}
-                </span>
-              )}
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
-            <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+        {loading ? (
+          <div className="col-span-4 text-center py-8 text-gray-500">
+            Loading stats...
           </div>
-        ))}
+        ) : (
+          statsCards.map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div
+                  className={`p-2 bg-${stat.color}-50 rounded-lg text-${stat.color}-600`}
+                >
+                  <stat.icon className="h-5 w-5" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
+              <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Main Content Grid */}

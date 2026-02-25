@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,11 +8,114 @@ import {
   Landmark,
   CheckCircle2,
   AlertCircle,
-  ExternalLink,
+  CreditCard,
+  Plus,
 } from "lucide-react";
+import api from "@/lib/axios";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+
+interface PaymentProvider {
+  id: string;
+  name: string;
+  currency: string;
+  isDefault: boolean;
+  config: {
+    api_key: string;
+    secret_key: string;
+  };
+}
+
+interface BankAccount {
+  accountName: string;
+  accountNumber: string;
+  bankName: string;
+  routingNumber: string;
+}
 
 export default function PayoutsPage() {
-  const [isConnected, setIsConnected] = useState(true); // Simulate connection status
+  const [providers, setProviders] = useState<PaymentProvider[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showProviderForm, setShowProviderForm] = useState(false);
+  const [showBankForm, setShowBankForm] = useState(false);
+  const [bankAccount, setBankAccount] = useState<BankAccount>({
+    accountName: "",
+    accountNumber: "",
+    bankName: "",
+    routingNumber: "",
+  });
+  const [providerForm, setProviderForm] = useState({
+    name: "stripe",
+    currency: "BDT",
+    api_key: "",
+    secret_key: "",
+  });
+
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const res = await api.get("/dashboard/fundraiser/payment-providers");
+        setProviders(Array.isArray(res.data.data) ? res.data.data : []);
+      } catch (error) {
+        console.error("Failed to fetch providers:", error);
+        setProviders([]);
+      }
+    };
+    loadProviders();
+  }, []);
+
+  const handleAddProvider = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.post("/dashboard/fundraiser/payment-providers", {
+        name: providerForm.name,
+        currency: providerForm.currency,
+        isDefault: providers.length === 0,
+        config: {
+          api_key: providerForm.api_key,
+          secret_key: providerForm.secret_key,
+        },
+      });
+      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      setProviders(Array.isArray(res.data.data) ? res.data.data : []);
+      setShowProviderForm(false);
+      setProviderForm({
+        name: "stripe",
+        currency: "BDT",
+        api_key: "",
+        secret_key: "",
+      });
+      toast.success("Provider added successfully");
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(
+        axiosError.response?.data?.message ||
+          "Failed to add provider. Please check your credentials.",
+      );
+      console.error("Failed to add provider:", error);
+    }
+    setLoading(false);
+  };
+
+  const handleSaveBankAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowBankForm(false);
+  };
+
+  const handleSetDefault = async (providerId: string) => {
+    try {
+      await api.patch(
+        `/dashboard/fundraiser/payment-providers/${providerId}/default`,
+      );
+      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      setProviders(Array.isArray(res.data.data) ? res.data.data : []);
+      toast.success("Default provider updated successfully");
+    } catch (error) {
+      toast.error("Failed to update default provider");
+      console.error("Failed to set default:", error);
+    }
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
@@ -24,7 +127,7 @@ export default function PayoutsPage() {
       </div>
 
       {/* Balance Card */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-6 text-white shadow-lg">
+      <div className="bg-linear-to-br from-slate-900 to-slate-800 rounded-xl p-6 text-white shadow-lg">
         <p className="text-slate-300 text-sm">Available Balance</p>
         <h2 className="text-4xl font-bold my-2">$24,500.00</h2>
         <div className="flex gap-3 mt-4">
@@ -33,56 +136,221 @@ export default function PayoutsPage() {
           </Button>
           <Button
             variant="outline"
-            className="border-slate-600 text-white hover:bg-slate-700"
+            className="bg-white text-slate-900 hover:bg-gray-100"
           >
             View History
           </Button>
         </div>
       </div>
 
-      {/* Payment Provider Setup */}
+      {/* Bank Account Setup */}
       <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
-        <div className="flex items-center gap-3 mb-2">
-          <Landmark className="h-5 w-5 text-green-600" />
-          <h3 className="font-semibold text-lg">Bank Account & Provider</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Landmark className="h-5 w-5 text-blue-600" />
+            <h3 className="font-semibold text-lg">Bank Account</h3>
+          </div>
+          <Button size="sm" onClick={() => setShowBankForm(!showBankForm)}>
+            <Plus className="h-4 w-4 mr-1" /> Add Account
+          </Button>
         </div>
 
-        {isConnected ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+        {showBankForm && (
+          <form
+            onSubmit={handleSaveBankAccount}
+            className="space-y-4 border-t pt-4"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Account Name</Label>
+                <Input
+                  value={bankAccount.accountName}
+                  onChange={(e) =>
+                    setBankAccount({
+                      ...bankAccount,
+                      accountName: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label>Account Number</Label>
+                <Input
+                  value={bankAccount.accountNumber}
+                  onChange={(e) =>
+                    setBankAccount({
+                      ...bankAccount,
+                      accountNumber: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label>Bank Name</Label>
+                <Input
+                  value={bankAccount.bankName}
+                  onChange={(e) =>
+                    setBankAccount({ ...bankAccount, bankName: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label>Routing Number</Label>
+                <Input
+                  value={bankAccount.routingNumber}
+                  onChange={(e) =>
+                    setBankAccount({
+                      ...bankAccount,
+                      routingNumber: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit">Save Account</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowBankForm(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* Payment Providers */}
+      <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CreditCard className="h-5 w-5 text-green-600" />
+            <h3 className="font-semibold text-lg">Payment Providers</h3>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setShowProviderForm(!showProviderForm)}
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add Provider
+          </Button>
+        </div>
+
+        {providers.length === 0 && !showProviderForm && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
+            <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0" />
+            <p className="text-sm text-yellow-800">
+              No payment provider configured. Add one to receive donations.
+            </p>
+          </div>
+        )}
+
+        {providers.map((provider) => (
+          <div
+            key={provider.id}
+            className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between"
+          >
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
               <div>
-                <p className="font-medium text-green-900">Stripe Connected</p>
-                <p className="text-sm text-green-700">Account ending in 4242</p>
+                <p className="font-medium text-green-900 capitalize">
+                  {provider.name} {provider.isDefault && "(Default)"}
+                </p>
+                <p className="text-sm text-green-700">
+                  Currency: {provider.currency}
+                </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsConnected(false)}
-            >
-              Manage
-            </Button>
+            {!provider.isDefault && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleSetDefault(provider.id)}
+              >
+                Set as Default
+              </Button>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
-              <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0" />
-              <p className="text-sm text-yellow-800">
-                You need to connect a payment provider to receive donations. We
-                use Stripe for secure transfers.
-              </p>
-            </div>
+        ))}
 
-            <div className="space-y-2">
-              <Label>Connect with Stripe</Label>
-              <div className="flex gap-3">
-                <Button className="bg-green-600 hover:bg-green-700 flex gap-2">
-                  Setup Stripe Account <ExternalLink className="h-4 w-4" />
-                </Button>
+        {showProviderForm && (
+          <form
+            onSubmit={handleAddProvider}
+            className="space-y-4 border-t pt-4"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Provider</Label>
+                <select
+                  className="w-full border rounded-md p-2"
+                  value={providerForm.name}
+                  onChange={(e) =>
+                    setProviderForm({ ...providerForm, name: e.target.value })
+                  }
+                >
+                  <option value="stripe">Stripe</option>
+                  <option value="sslcommerz">SSLCommerz</option>
+                </select>
+              </div>
+              <div>
+                <Label>Currency</Label>
+                <Input
+                  value={providerForm.currency}
+                  onChange={(e) =>
+                    setProviderForm({
+                      ...providerForm,
+                      currency: e.target.value,
+                    })
+                  }
+                  placeholder="USD, BDT, etc."
+                  required
+                />
+              </div>
+              <div>
+                <Label>API Key</Label>
+                <Input
+                  value={providerForm.api_key}
+                  onChange={(e) =>
+                    setProviderForm({
+                      ...providerForm,
+                      api_key: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label>Secret Key</Label>
+                <Input
+                  type="password"
+                  value={providerForm.secret_key}
+                  onChange={(e) =>
+                    setProviderForm({
+                      ...providerForm,
+                      secret_key: e.target.value,
+                    })
+                  }
+                  required
+                />
               </div>
             </div>
-          </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading}>
+                {loading ? "Saving..." : "Add Provider"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowProviderForm(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
         )}
       </div>
     </div>
