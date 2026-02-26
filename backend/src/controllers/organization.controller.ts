@@ -1,11 +1,18 @@
 import { Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler";
 import organizationService from "../services/organization.service";
+import {
+  createOrganizationSchema,
+  updateOrganizationSchema,
+} from "../schema/organization.schema";
 
 export const createOrganization = asyncHandler(
   async (req: Request, res: Response) => {
-    const { name } = req.body;
-    const organization = await organizationService.create(name, req.user!.id);
+    const data = createOrganizationSchema.parse(req.body);
+    const organization = await organizationService.createOrganization(
+      req.user!.id,
+      data,
+    );
 
     res.status(201).json({
       success: true,
@@ -17,14 +24,16 @@ export const createOrganization = asyncHandler(
 
 export const getMyOrganizations = asyncHandler(
   async (req: Request, res: Response) => {
-    const organizations = await organizationService.getByUser(req.user!.id);
+    const organizations = await organizationService.getUserOrganizations(
+      req.user!.id,
+    );
     res.json({ success: true, data: organizations });
   },
 );
 
 export const getOrganization = asyncHandler(
   async (req: Request, res: Response) => {
-    const organization = await organizationService.getById(
+    const organization = await organizationService.getOrganizationById(
       String(req.params.id),
       req.user!.id,
     );
@@ -34,11 +43,11 @@ export const getOrganization = asyncHandler(
 
 export const updateOrganization = asyncHandler(
   async (req: Request, res: Response) => {
-    const { name, settings, logoUrl, primaryColor, secondaryColor, customDomain } = req.body;
-    const organization = await organizationService.update(
+    const data = updateOrganizationSchema.parse(req.body);
+    const organization = await organizationService.updateOrganization(
       String(req.params.id),
       req.user!.id,
-      { name, settings, logoUrl, primaryColor, secondaryColor, customDomain },
+      data,
     );
 
     res.json({
@@ -51,52 +60,10 @@ export const updateOrganization = asyncHandler(
 
 export const deleteOrganization = asyncHandler(
   async (req: Request, res: Response) => {
-    await organizationService.delete(String(req.params.id), req.user!.id);
+    await organizationService.deleteOrganization(
+      String(req.params.id),
+      req.user!.id,
+    );
     res.json({ success: true, message: "Organization deleted successfully" });
-  },
-);
-
-export const addMember = asyncHandler(async (req: Request, res: Response) => {
-  const { email, role } = req.body;
-  const member = await organizationService.addMember(
-    String(req.params.id),
-    req.user!.id,
-    email,
-    role,
-  );
-
-  res.status(201).json({
-    success: true,
-    message: "Member added successfully",
-    data: member,
-  });
-});
-
-export const updateMemberRole = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { role } = req.body;
-    const member = await organizationService.updateMemberRole(
-      String(req.params.id),
-      req.user!.id,
-      String(req.params.memberId),
-      role,
-    );
-
-    res.json({
-      success: true,
-      message: "Member role updated successfully",
-      data: member,
-    });
-  },
-);
-
-export const removeMember = asyncHandler(
-  async (req: Request, res: Response) => {
-    await organizationService.removeMember(
-      String(req.params.id),
-      req.user!.id,
-      String(req.params.memberId),
-    );
-    res.json({ success: true, message: "Member removed successfully" });
   },
 );
