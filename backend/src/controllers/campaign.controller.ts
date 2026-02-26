@@ -195,15 +195,13 @@ export const getCampaignStats = asyncHandler(
 export const getTopCampaigns = asyncHandler(
   async (req: Request, res: Response) => {
     const campaigns = await campaignService.getTopCampaigns();
-
-    console.log(campaigns);
-
     res.json({
       success: true,
       message: "Top campaigns retrieved successfully",
       data: campaigns.map((c) => ({
         id: c.id,
         title: c.title,
+        goalAmount: c.goalAmount,
         raisedAmount: c.raisedAmount,
         donorCount: c.donations.length,
       })),

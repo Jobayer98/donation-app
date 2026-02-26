@@ -3,7 +3,6 @@ import { createCampaignDTO } from "../schema/campaign.schema";
 
 class CampaignService {
     async create(data: createCampaignDTO, fundraiserId: string) {
-        console.log(data);
         return prisma.campaign.create({
             data: {
                 ...data,
@@ -168,7 +167,7 @@ class CampaignService {
         };
     }
 
-    async getTopCampaigns(limit: number = 4) {
+    async getTopCampaigns(limit: number = 3) {
         return prisma.campaign.findMany({
             where: { status: "ACTIVE" },
             take: limit,
@@ -177,6 +176,7 @@ class CampaignService {
                 id: true,
                 title: true,
                 raisedAmount: true,
+                goalAmount: true,
                 donations: { where: { status: "SUCCESS" } }
             }
         });

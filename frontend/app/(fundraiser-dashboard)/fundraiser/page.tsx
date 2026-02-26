@@ -14,6 +14,14 @@ interface OverviewStats {
   totalDonors: number;
 }
 
+interface TopCampaign {
+  id: string;
+  title: string;
+  goalAmount: string;
+  raisedAmount: string;
+  donorCount: number;
+}
+
 const recentActivity = [
   {
     id: 1,
@@ -55,6 +63,7 @@ export default function FundraiserOverviewPage() {
     totalRaised: 0,
     totalDonors: 0,
   });
+  const [topCampaigns, setTopCampaigns] = useState<TopCampaign[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +77,16 @@ export default function FundraiserOverviewPage() {
         setLoading(false);
       }
     };
+    const loadTopCampaigns = async () => {
+      try {
+        const res = await api.get("/dashboard/fundraiser/campaigns/top");
+        setTopCampaigns(Array.isArray(res.data.data) ? res.data.data : []);
+      } catch (error) {
+        console.error("Failed to fetch top campaigns:", error);
+      }
+    };
     loadOverview();
+    loadTopCampaigns();
   }, []);
 
   const statsCards = [
@@ -196,44 +214,38 @@ export default function FundraiserOverviewPage() {
           </div>
         </div>
 
-        {/* Quick Actions & Top Campaigns */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <div className="bg-linear-to-br from-slate-900 to-slate-800 rounded-xl p-5 text-white shadow-lg">
-            <h3 className="font-semibold mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <Button
-                variant="secondary"
-                className="w-full bg-white/10 hover:bg-white/20 text-white justify-start gap-2"
-              >
-                <Megaphone className="h-4 w-4" /> Launch Campaign
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full bg-white/10 hover:bg-white/20 text-white justify-start gap-2"
-              >
-                <Users className="h-4 w-4" /> Invite Team
-              </Button>
+        {/* Top Campaigns */}
+        <div className="space-y-4">
+          <h3 className="font-bold text-gray-900">Top Campaigns</h3>
+          {topCampaigns.length === 0 ? (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 text-center text-gray-500">
+              No campaigns yet
             </div>
-          </div>
-
-          {/* Top Performing Campaign */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h3 className="font-bold text-gray-900 mb-3">Top Campaign</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Clean Water Initiative</span>
-                <span className="font-bold text-green-600">$45,000</span>
-              </div>
-              <div className="w-full bg-gray-100 rounded-full h-2">
-                <div
-                  className="bg-green-600 h-2 rounded-full"
-                  style={{ width: "90%" }}
-                ></div>
-              </div>
-              <p className="text-xs text-gray-400 text-right">90% of goal</p>
-            </div>
-          </div>
+          ) : (
+            topCampaigns.map((campaign) => {
+              const percentage = (parseFloat(campaign.raisedAmount) / parseFloat(campaign.goalAmount)) * 100;
+              return (
+                <div key={campaign.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 font-medium">{campaign.title}</span>
+                      <span className="font-bold text-green-600">${campaign.raisedAmount}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-green-600 h-2 rounded-full"
+                        style={{ width: `${Math.min(percentage, 100)}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>{campaign.donorCount} donors</span>
+                      <span>{percentage.toFixed(1)}% of ${campaign.goalAmount}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
