@@ -199,7 +199,7 @@ export default function FundraiserOverviewPage() {
         {/* Quick Actions & Top Campaigns */}
         <div className="space-y-6">
           {/* Quick Actions */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-5 text-white shadow-lg">
+          <div className="bg-linear-to-br from-slate-900 to-slate-800 rounded-xl p-5 text-white shadow-lg">
             <h3 className="font-semibold mb-3">Quick Actions</h3>
             <div className="space-y-2">
               <Button

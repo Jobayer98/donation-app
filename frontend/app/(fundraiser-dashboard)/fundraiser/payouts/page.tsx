@@ -10,6 +10,10 @@ import {
   AlertCircle,
   CreditCard,
   Plus,
+  Trash2,
+  Edit,
+  Power,
+  XCircle,
 } from "lucide-react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
@@ -20,6 +24,7 @@ interface PaymentProvider {
   name: string;
   currency: string;
   isDefault: boolean;
+  isActive: boolean;
   config: {
     api_key: string;
     secret_key: string;
@@ -38,6 +43,7 @@ export default function PayoutsPage() {
   const [loading, setLoading] = useState(false);
   const [showProviderForm, setShowProviderForm] = useState(false);
   const [showBankForm, setShowBankForm] = useState(false);
+  const [editingProvider, setEditingProvider] = useState<PaymentProvider | null>(null);
   const [bankAccount, setBankAccount] = useState<BankAccount>({
     accountName: "",
     accountNumber: "",
@@ -68,32 +74,45 @@ export default function PayoutsPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post("/dashboard/fundraiser/payment-providers", {
-        name: providerForm.name,
-        currency: providerForm.currency,
-        isDefault: providers.length === 0,
-        config: {
-          api_key: providerForm.api_key,
-          secret_key: providerForm.secret_key,
-        },
-      });
+      if (editingProvider) {
+        await api.put(`/dashboard/fundraiser/payment-providers/${editingProvider.id}`, {
+          name: providerForm.name,
+          currency: providerForm.currency,
+          config: {
+            api_key: providerForm.api_key,
+            secret_key: providerForm.secret_key,
+          },
+        });
+        toast.success("Provider updated successfully");
+      } else {
+        await api.post("/dashboard/fundraiser/payment-providers", {
+          name: providerForm.name,
+          currency: providerForm.currency,
+          isDefault: providers.length === 0,
+          config: {
+            api_key: providerForm.api_key,
+            secret_key: providerForm.secret_key,
+          },
+        });
+        toast.success("Provider added successfully");
+      }
       const res = await api.get("/dashboard/fundraiser/payment-providers");
       setProviders(Array.isArray(res.data.data) ? res.data.data : []);
       setShowProviderForm(false);
+      setEditingProvider(null);
       setProviderForm({
         name: "stripe",
         currency: "BDT",
         api_key: "",
         secret_key: "",
       });
-      toast.success("Provider added successfully");
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
       toast.error(
         axiosError.response?.data?.message ||
-          "Failed to add provider. Please check your credentials.",
+          "Failed to save provider. Please check your credentials.",
       );
-      console.error("Failed to add provider:", error);
+      console.error("Failed to save provider:", error);
     }
     setLoading(false);
   };
@@ -115,6 +134,42 @@ export default function PayoutsPage() {
       toast.error("Failed to update default provider");
       console.error("Failed to set default:", error);
     }
+  };
+
+  const handleToggleActive = async (providerId: string) => {
+    try {
+      await api.patch(`/dashboard/fundraiser/payment-providers/${providerId}/toggle`);
+      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      setProviders(Array.isArray(res.data.data) ? res.data.data : []);
+      toast.success("Provider status updated");
+    } catch (error) {
+      toast.error("Failed to toggle provider status");
+      console.error("Failed to toggle:", error);
+    }
+  };
+
+  const handleDelete = async (providerId: string) => {
+    if (!confirm("Are you sure you want to delete this provider?")) return;
+    try {
+      await api.delete(`/dashboard/fundraiser/payment-providers/${providerId}`);
+      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      setProviders(Array.isArray(res.data.data) ? res.data.data : []);
+      toast.success("Provider deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete provider");
+      console.error("Failed to delete:", error);
+    }
+  };
+
+  const handleEdit = (provider: PaymentProvider) => {
+    setEditingProvider(provider);
+    setProviderForm({
+      name: provider.name,
+      currency: provider.currency,
+      api_key: provider.config.api_key,
+      secret_key: provider.config.secret_key,
+    });
+    setShowProviderForm(true);
   };
 
   return (
@@ -252,28 +307,63 @@ export default function PayoutsPage() {
         {providers.map((provider) => (
           <div
             key={provider.id}
-            className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between"
+            className={`rounded-lg p-4 flex items-center justify-between ${
+              provider.isActive
+                ? "bg-green-50 border border-green-200"
+                : "bg-gray-50 border border-gray-200"
+            }`}
           >
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              {provider.isActive ? (
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              ) : (
+                <XCircle className="h-5 w-5 text-gray-400" />
+              )}
               <div>
-                <p className="font-medium text-green-900 capitalize">
+                <p className="font-medium text-gray-900 capitalize">
                   {provider.name} {provider.isDefault && "(Default)"}
+                  {!provider.isActive && " - Inactive"}
                 </p>
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-gray-600">
                   Currency: {provider.currency}
                 </p>
               </div>
             </div>
-            {!provider.isDefault && (
+            <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleSetDefault(provider.id)}
+                onClick={() => handleToggleActive(provider.id)}
+                title={provider.isActive ? "Deactivate" : "Activate"}
               >
-                Set as Default
+                <Power className="h-4 w-4" />
               </Button>
-            )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleEdit(provider)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              {!provider.isDefault && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleSetDefault(provider.id)}
+                  >
+                    Set Default
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(provider.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         ))}
 
@@ -340,12 +430,21 @@ export default function PayoutsPage() {
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Add Provider"}
+                {loading ? "Saving..." : editingProvider ? "Update Provider" : "Add Provider"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setShowProviderForm(false)}
+                onClick={() => {
+                  setShowProviderForm(false);
+                  setEditingProvider(null);
+                  setProviderForm({
+                    name: "stripe",
+                    currency: "BDT",
+                    api_key: "",
+                    secret_key: "",
+                  });
+                }}
               >
                 Cancel
               </Button>

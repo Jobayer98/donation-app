@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler";
 import paymentProviderService from "../services/paymentProvider.service";
+import { decrypt } from "../utils/crypto";
 
 export const createPaymentProvider = asyncHandler(
   async (req: Request, res: Response) => {
@@ -24,7 +25,7 @@ export const getMyPaymentProviders = asyncHandler(
     const providers = await paymentProviderService.findByFundraiser(
       req.user!.id,
     );
-    res.json({ success: true, data: providers });
+    res.json({ success: true, data: providers.map((provider) => ({ ...provider, config: JSON.parse(decrypt(provider.config as string)) })) });
   },
 );
 

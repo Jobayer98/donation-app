@@ -74,7 +74,7 @@ class PaymentProviderService {
   async findByFundraiser(fundRaiserId: string) {
     return prisma.paymentProvider.findMany({
       where: { fundRaiserId },
-      select: { id: true, name: true, currency: true, isActive: true, isDefault: true, createdAt: true },
+      select: { id: true, name: true, currency: true, isActive: true, isDefault: true, createdAt: true, config: true },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }]
     });
   }
