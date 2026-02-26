@@ -24,7 +24,7 @@ export const createOrganization = asyncHandler(
 
 export const getMyOrganizations = asyncHandler(
   async (req: Request, res: Response) => {
-    const organizations = await organizationService.getUserOrganizations(
+    const organizations = await organizationService.getUserOrganization(
       req.user!.id,
     );
     res.json({ success: true, data: organizations });

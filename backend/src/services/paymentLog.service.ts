@@ -1,7 +1,15 @@
 import { prisma } from "../lib/prisma";
+import { ApiError } from "../utils/ApiError";
+import organizationService from "./organization.service";
 
 class PaymentLogService {
-  async create(data: any, fundRaiserId: string) {
+  async create(data: any, userId: string) {
+    const org = await organizationService.getUserOrganization(userId);
+    
+    if (!org) {
+      throw new ApiError(404, "Organization not found. Please create an organization first.");
+    }
+
     return prisma.paymentLog.create({
       data: {
         transactionId: data.tran_id,
@@ -19,7 +27,7 @@ class PaymentLogService {
         currencyType: data.currency_type,
         currencyAmount: parseFloat(data.currency_amount),
         currencyRate: parseFloat(data.currency_rate),
-        fundRaiserId,
+        organizationId: org.id,
       },
     });
   }

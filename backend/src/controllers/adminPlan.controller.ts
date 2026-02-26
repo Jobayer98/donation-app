@@ -56,12 +56,12 @@ export const getSubscriptionStats = asyncHandler(
   },
 );
 
-export const cancelUserSubscription = asyncHandler(
-  async (req: Request, res: Response) => {
-    await adminPlanService.cancelUserSubscription(String(req.params.userId));
-    res.json({
-      success: true,
-      message: "Subscription canceled successfully",
-    });
-  },
-);
+// export const cancelUserSubscription = asyncHandler(
+//   async (req: Request, res: Response) => {
+//     await adminPlanService.cancelUserSubscription(String(req.params.userId));
+//     res.json({
+//       success: true,
+//       message: "Subscription canceled successfully",
+//     });
+//   },
+// );

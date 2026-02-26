@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { adminOverview, adminCampaigns, adminCampaignStatus, adminUsers, updateUserRole } from "../../../controllers/admin.controller";
-import { cancelUserSubscription, createPlan, getAllPlans, getAllSubscriptions, getSubscriptionStats, togglePlanStatus, updatePlan } from "../../../controllers/adminPlan.controller";
+import * as adminController from "../../../controllers/admin.controller";
+import * as adminPlanController from "../../../controllers/adminPlan.controller";
 import { isAuthenticated, authorize } from "../../../middlewares/auth.middleware";
 import { validateBody } from "../../../middlewares/validate.middleware";
 import { UpdateCampaignStatusSchema } from "../../../schema/campaign.schema";
@@ -45,7 +45,7 @@ router.use(isAuthenticated, authorize("ADMIN"));
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.get("/overview", adminOverview);
+router.get("/overview", adminController.adminOverview);
 
 /**
  * @openapi
@@ -81,7 +81,7 @@ router.get("/overview", adminOverview);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.get("/campaigns", adminCampaigns);
+router.get("/campaigns", adminController.adminCampaigns);
 
 /**
  * @openapi
@@ -117,7 +117,7 @@ router.get("/campaigns", adminCampaigns);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.get("/users", adminUsers);
+router.get("/users", adminController.adminUsers);
 
 /**
  * @openapi
@@ -159,7 +159,7 @@ router.get("/users", adminUsers);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.patch("/campaigns/:id/status", validateBody(UpdateCampaignStatusSchema), adminCampaignStatus);
+router.patch("/campaigns/:id/status", validateBody(UpdateCampaignStatusSchema), adminController.adminCampaignStatus);
 
 /**
  * @openapi
@@ -201,7 +201,7 @@ router.patch("/campaigns/:id/status", validateBody(UpdateCampaignStatusSchema), 
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.patch("/users/:id/role", validateBody(UpdateUserRoleSchema), updateUserRole);
+router.patch("/users/:id/role", validateBody(UpdateUserRoleSchema), adminController.updateUserRole);
 
 // Plan Management
 
@@ -239,7 +239,7 @@ router.patch("/users/:id/role", validateBody(UpdateUserRoleSchema), updateUserRo
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.get("/plans", getAllPlans);
+router.get("/plans", adminPlanController.getAllPlans);
 
 /**
  * @openapi
@@ -281,7 +281,7 @@ router.get("/plans", getAllPlans);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.post("/plans", validateBody(createPlanSchema), createPlan);
+router.post("/plans", validateBody(createPlanSchema), adminPlanController.createPlan);
 
 /**
  * @openapi
@@ -329,7 +329,7 @@ router.post("/plans", validateBody(createPlanSchema), createPlan);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.put("/plans/:id", validateBody(updatePlanSchema), updatePlan);
+router.put("/plans/:id", validateBody(updatePlanSchema), adminPlanController.updatePlan);
 
 /**
  * @openapi
@@ -371,7 +371,7 @@ router.put("/plans/:id", validateBody(updatePlanSchema), updatePlan);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.patch("/plans/:id/toggle", togglePlanStatus);
+router.patch("/plans/:id/toggle", adminPlanController.togglePlanStatus);
 
 // Subscription Management
 /**
@@ -408,7 +408,7 @@ router.patch("/plans/:id/toggle", togglePlanStatus);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.get("/subscriptions", getAllSubscriptions);
+router.get("/subscriptions", adminPlanController.getAllSubscriptions);
 
 /**
  * @openapi
@@ -444,48 +444,6 @@ router.get("/subscriptions", getAllSubscriptions);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.get("/subscriptions/stats", getSubscriptionStats);
-
-/**
- * @openapi
- * /api/v1/dashboard/admin/subscriptions/{userId}/cancel:
- *   post:
- *     summary: Cancel subscription
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.post("/subscriptions/:userId/cancel", cancelUserSubscription);
+router.get("/subscriptions/stats", adminPlanController.getSubscriptionStats);
 
 export default router;

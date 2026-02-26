@@ -74,9 +74,6 @@ class AdminPlanService {
         skip,
         take: limit,
         include: {
-          user: {
-            select: { id: true, name: true, email: true }
-          },
           plan: {
             select: { id: true, name: true, type: true, price: true }
           }
@@ -125,23 +122,23 @@ class AdminPlanService {
     };
   }
 
-  async cancelUserSubscription(userId: string) {
-    const subscription = await prisma.subscription.findUnique({
-      where: { userId }
-    });
+  // async cancelUserSubscription(userId: string) {
+  //   const subscription = await prisma.subscription.findUnique({
+  //     where: { userId }
+  //   });
 
-    if (!subscription) {
-      throw new ApiError(404, "Subscription not found");
-    }
+  //   if (!subscription) {
+  //     throw new ApiError(404, "Subscription not found");
+  //   }
 
-    return prisma.subscription.update({
-      where: { userId },
-      data: {
-        status: 'CANCELED',
-        cancelAtPeriodEnd: true
-      }
-    });
-  }
+  //   return prisma.subscription.update({
+  //     where: { userId },
+  //     data: {
+  //       status: 'CANCELED',
+  //       cancelAtPeriodEnd: true
+  //     }
+  //   });
+  // }
 }
 
 export default new AdminPlanService();

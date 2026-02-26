@@ -33,30 +33,6 @@ class AuthService {
             select: { id: true, role: true, email: true, name: true }
         });
 
-
-        // Auto-subscribe fundraisers to free plan
-        if (data.role === 'FUND_RAISER') {
-
-            const freePlan = await prisma.plan.findUnique({ where: { type: 'FREE' } });
-
-            if (freePlan) {
-                const now = new Date();
-                const endDate = new Date(now);
-                endDate.setFullYear(endDate.getFullYear() + 100);
-
-                await prisma.subscription.create({
-                    data: {
-                        userId: user.id,
-                        planId: freePlan.id,
-                        status: 'ACTIVE',
-                        currentPeriodStart: now,
-                        currentPeriodEnd: endDate,
-                    }
-                });
-            }
-
-        }
-
         // Add email jobs to background queue in parallel
 
         await Promise.all([
@@ -75,6 +51,8 @@ class AuthService {
         const token = generateAccessToken({ id: user.id, role: user.role });
         return { id: user.id, token, message: "Please check your email to verify your account" };
     }
+
+
 
     async login(data: loginDTO) {
         const user = await prisma.user.findUnique({

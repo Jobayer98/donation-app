@@ -99,7 +99,7 @@ class DonationService {
     return prisma.campaign.update({
       where: { id: campaignId },
       data: { raisedAmount: { increment: amount } },
-      select: { fundraiserId: true },
+      select: { organizationId: true, createdById: true },
     });
   }
 
@@ -111,7 +111,12 @@ class DonationService {
         campaign: {
           select: {
             title: true,
-            user: { select: { id: true, name: true, email: true } },
+            createdById: true,
+            organization: {
+              select: {
+                owner: { select: { id: true, name: true, email: true } },
+              },
+            },
           },
         },
       },
@@ -119,9 +124,11 @@ class DonationService {
 
     if (!donation || donation.status !== "SUCCESS") return;
 
+    const fundraiser = donation.campaign.organization.owner;
+
     // Create in-app notification for fundraiser
     await notificationService.create(
-      donation.campaign.user.id,
+      fundraiser.id,
       "DONATION",
       "New Donation Received",
       `You received $${Number(donation.amount)} from ${donation.donor?.name || "Anonymous"} for ${donation.campaign.title}`,
@@ -133,12 +140,10 @@ class DonationService {
       },
     );
 
-    // Add email jobs to background queue
-
     // Send receipt to donor
     if (donation.donor && !donation.isAnonymous) {
       await addEmailJob({
-        type: 'DONATION_RECEIPT',
+        type: "DONATION_RECEIPT",
         email: donation.donor.email,
         payload: {
           donorName: donation.donor.name,
@@ -146,22 +151,22 @@ class DonationService {
           currency: "BDT",
           campaignTitle: donation.campaign.title,
           transactionId,
-        }
+        },
       });
     }
 
     // Send notification to fundraiser
     await addEmailJob({
-      type: 'DONATION_NOTIFICATION',
-      email: donation.campaign.user.email,
+      type: "DONATION_NOTIFICATION",
+      email: fundraiser.email,
       payload: {
-        fundraiserName: donation.campaign.user.name,
+        fundraiserName: fundraiser.name,
         donorName: donation.donor?.name || "Anonymous",
         amount: Number(donation.amount),
         currency: "BDT",
         campaignTitle: donation.campaign.title,
         isAnonymous: donation.isAnonymous,
-      }
+      },
     });
   }
 }
