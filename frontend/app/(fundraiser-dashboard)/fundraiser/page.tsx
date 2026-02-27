@@ -69,7 +69,7 @@ export default function FundraiserOverviewPage() {
   useEffect(() => {
     const loadOverview = async () => {
       try {
-        const res = await api.get("/dashboard/fundraiser/overview");
+        const res = await api.get("/fundraiser/overview");
         setStats(res.data.data);
       } catch (error) {
         console.error("Failed to fetch overview:", error);
@@ -79,7 +79,7 @@ export default function FundraiserOverviewPage() {
     };
     const loadTopCampaigns = async () => {
       try {
-        const res = await api.get("/dashboard/fundraiser/campaigns/top");
+        const res = await api.get("/fundraiser/campaigns/top");
         setTopCampaigns(Array.isArray(res.data.data) ? res.data.data : []);
       } catch (error) {
         console.error("Failed to fetch top campaigns:", error);

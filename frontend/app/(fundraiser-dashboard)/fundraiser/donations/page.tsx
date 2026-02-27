@@ -42,9 +42,7 @@ export default function FundraiserDonationsPage() {
   const loadDonations = async (page: number) => {
     setLoading(true);
     try {
-      const res = await api.get(
-        `/dashboard/fundraiser/donations?page=${page}&limit=10`,
-      );
+      const res = await api.get(`/fundraiser/donations?page=${page}&limit=10`);
       const responseData = res.data.data;
       setDonations(
         Array.isArray(responseData.donations) ? responseData.donations : [],

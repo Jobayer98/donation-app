@@ -43,7 +43,8 @@ export default function PayoutsPage() {
   const [loading, setLoading] = useState(false);
   const [showProviderForm, setShowProviderForm] = useState(false);
   const [showBankForm, setShowBankForm] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<PaymentProvider | null>(null);
+  const [editingProvider, setEditingProvider] =
+    useState<PaymentProvider | null>(null);
   const [bankAccount, setBankAccount] = useState<BankAccount>({
     accountName: "",
     accountNumber: "",
@@ -60,7 +61,7 @@ export default function PayoutsPage() {
   useEffect(() => {
     const loadProviders = async () => {
       try {
-        const res = await api.get("/dashboard/fundraiser/payment-providers");
+        const res = await api.get("/fundraiser/payment-providers");
         setProviders(Array.isArray(res.data.data) ? res.data.data : []);
       } catch (error) {
         console.error("Failed to fetch providers:", error);
@@ -75,7 +76,7 @@ export default function PayoutsPage() {
     setLoading(true);
     try {
       if (editingProvider) {
-        await api.put(`/dashboard/fundraiser/payment-providers/${editingProvider.id}`, {
+        await api.put(`/fundraiser/payment-providers/${editingProvider.id}`, {
           name: providerForm.name,
           currency: providerForm.currency,
           config: {
@@ -85,7 +86,7 @@ export default function PayoutsPage() {
         });
         toast.success("Provider updated successfully");
       } else {
-        await api.post("/dashboard/fundraiser/payment-providers", {
+        await api.post("/fundraiser/payment-providers", {
           name: providerForm.name,
           currency: providerForm.currency,
           isDefault: providers.length === 0,
@@ -96,7 +97,7 @@ export default function PayoutsPage() {
         });
         toast.success("Provider added successfully");
       }
-      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      const res = await api.get("/fundraiser/payment-providers");
       setProviders(Array.isArray(res.data.data) ? res.data.data : []);
       setShowProviderForm(false);
       setEditingProvider(null);
@@ -124,10 +125,8 @@ export default function PayoutsPage() {
 
   const handleSetDefault = async (providerId: string) => {
     try {
-      await api.patch(
-        `/dashboard/fundraiser/payment-providers/${providerId}/default`,
-      );
-      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      await api.patch(`/fundraiser/payment-providers/${providerId}/default`);
+      const res = await api.get("/fundraiser/payment-providers");
       setProviders(Array.isArray(res.data.data) ? res.data.data : []);
       toast.success("Default provider updated successfully");
     } catch (error) {
@@ -138,8 +137,8 @@ export default function PayoutsPage() {
 
   const handleToggleActive = async (providerId: string) => {
     try {
-      await api.patch(`/dashboard/fundraiser/payment-providers/${providerId}/toggle`);
-      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      await api.patch(`/fundraiser/payment-providers/${providerId}/toggle`);
+      const res = await api.get("/fundraiser/payment-providers");
       setProviders(Array.isArray(res.data.data) ? res.data.data : []);
       toast.success("Provider status updated");
     } catch (error) {
@@ -151,8 +150,8 @@ export default function PayoutsPage() {
   const handleDelete = async (providerId: string) => {
     if (!confirm("Are you sure you want to delete this provider?")) return;
     try {
-      await api.delete(`/dashboard/fundraiser/payment-providers/${providerId}`);
-      const res = await api.get("/dashboard/fundraiser/payment-providers");
+      await api.delete(`/fundraiser/payment-providers/${providerId}`);
+      const res = await api.get("/fundraiser/payment-providers");
       setProviders(Array.isArray(res.data.data) ? res.data.data : []);
       toast.success("Provider deleted successfully");
     } catch (error) {
@@ -430,7 +429,11 @@ export default function PayoutsPage() {
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : editingProvider ? "Update Provider" : "Add Provider"}
+                {loading
+                  ? "Saving..."
+                  : editingProvider
+                    ? "Update Provider"
+                    : "Add Provider"}
               </Button>
               <Button
                 type="button"

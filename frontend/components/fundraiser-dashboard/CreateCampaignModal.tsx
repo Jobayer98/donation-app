@@ -83,8 +83,7 @@ export default function CreateCampaignModal({
         type: formData.type,
       };
 
-      const res = await api.post("dashboard/fundraiser/campaigns", payload);
-      console.log(res.data);
+      const res = await api.post("fundraiser/campaigns", payload);
       toast.success("Campaign created successfully");
       onSuccess?.();
       setIsOpen(false);

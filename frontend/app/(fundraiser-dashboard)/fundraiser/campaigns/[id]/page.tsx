@@ -47,7 +47,7 @@ export default function EditCampaignPage() {
     const fetchCampaign = async () => {
       try {
         const res = await api.get(
-          `dashboard/fundraiser/campaigns/${params.id}`,
+          `fundraiser/campaigns/${params.id}`,
         );
         const data = res.data.data;
         setFormData({
@@ -104,7 +104,7 @@ export default function EditCampaignPage() {
         type: formData.type,
       };
 
-      await api.patch(`dashboard/fundraiser/campaigns/${params.id}`, payload);
+      await api.patch(`fundraiser/campaigns/${params.id}`, payload);
       toast.success("Campaign updated successfully");
       router.push("/fundraiser/campaigns");
     } catch (error) {

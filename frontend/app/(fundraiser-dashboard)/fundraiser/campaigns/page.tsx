@@ -38,7 +38,7 @@ export default function CampaignsPage() {
   const fetchCampaigns = async () => {
     try {
       setIsLoading(true);
-      const res = await api.get("dashboard/fundraiser/campaigns");
+      const res = await api.get("fundraiser/campaigns");
       setCampaigns(res.data.data);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
@@ -50,7 +50,7 @@ export default function CampaignsPage() {
 
   const handlePublish = async (id: string) => {
     try {
-      await api.patch(`dashboard/fundraiser/campaigns/${id}/publish`);
+      await api.patch(`fundraiser/campaigns/${id}/publish`);
       toast.success("Campaign published successfully");
       fetchCampaigns();
     } catch (error) {
@@ -61,7 +61,7 @@ export default function CampaignsPage() {
 
   const handleClose = async (id: string) => {
     try {
-      await api.patch(`dashboard/fundraiser/campaigns/${id}/close`);
+      await api.patch(`fundraiser/campaigns/${id}/close`);
       toast.success("Campaign closed successfully");
       fetchCampaigns();
     } catch (error) {
