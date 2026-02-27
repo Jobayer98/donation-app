@@ -95,7 +95,7 @@ class AuthService {
         ]).catch(err => logger.error("⚠️ Failed to queue emails:", err));
 
         const token = generateAccessToken({ id: result.id, role: result.role });
-        return { id: result.id, token, message: "Please check your email to verify your account" };
+        return { id: result.id, role: result.role, token, message: "Please check your email to verify your account" };
     }
 
 
@@ -111,7 +111,7 @@ class AuthService {
         }
 
         const token = generateAccessToken({ id: user.id, role: user.role });
-        return { id: user.id, name: user.name, email: user.email, token, verified: user.verificationStatus };
+        return { id: user.id, name: user.name, email: user.email, role: user.role, token, verified: user.verificationStatus };
     }
 
     async verifyEmail(token: string) {

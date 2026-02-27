@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma";
 import { ApiError } from "../utils/ApiError";
 import {
   createOrganizationDTO,
+  updateNotificationPreferencesDTO,
   updateOrganizationDTO,
 } from "../schema/organization.schema";
 
@@ -110,6 +111,50 @@ class OrganizationService {
     await this.verifyOwnership(orgId, userId);
 
     await prisma.organization.delete({ where: { id: orgId } });
+  }
+
+  async toggleOrganizationStatus(orgId: string, userId: string) {
+    await this.verifyOwnership(orgId, userId);
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: orgId },
+    });
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
+    return prisma.organization.update({
+      where: { id: orgId },
+      data: { isActive: !organization.isActive },
+    });
+  }
+
+  async getNotificationPreferences(orgId: string, userId: string) {
+    await this.verifyOwnership(orgId, userId);
+
+    return prisma.organization.findUnique({
+      where: { id: orgId },
+      select: {
+        donationAlert: true,
+        donationAlertEmail: true,
+        weeklySummary: true,
+        monthlySummary: true,
+      },
+    });
+  }
+
+  async updateNotificationPreferences(
+    orgId: string,
+    userId: string,
+    data: updateNotificationPreferencesDTO,
+  ) {
+    await this.verifyOwnership(orgId, userId);
+
+    return prisma.organization.update({
+      where: { id: orgId },
+      data,
+    });
   }
 }
 

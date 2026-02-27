@@ -3,7 +3,8 @@ import * as organizationController from "../../controllers/organization.controll
 import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
 import { appRateLimit } from "../../middlewares/rateLimit.middleware";
 import { validateBody } from "../../middlewares/validate.middleware";
-import { createOrganizationSchema, updateOrganizationSchema } from "../../schema/organization.schema";
+import { createOrganizationSchema, updateNotificationPreferencesSchema, updateOrganizationSchema } from "../../schema/organization.schema";
+import { upload } from "../../middlewares/upload.middleware";
 
 const router = Router();
 
@@ -74,6 +75,42 @@ router.post("/", validateBody(createOrganizationSchema), organizationController.
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
 router.get("/", organizationController.getMyOrganizations);
+
+/**
+ * @openapi
+ * /api/v1/organizations/notification-preferences:
+ *   get:
+ *     summary: Get notification preferences
+ *     tags: [Organization]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/notification-preferences", organizationController.getNotificationPreferences);
 
 /**
  * @openapi
@@ -151,7 +188,7 @@ router.get("/:id", organizationController.getOrganization);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.put("/:id", validateBody(updateOrganizationSchema), organizationController.updateOrganization);
+router.patch("/:id", upload.single("logo"), validateBody(updateOrganizationSchema), organizationController.updateOrganization);
 
 /**
  * @openapi
@@ -188,5 +225,49 @@ router.put("/:id", validateBody(updateOrganizationSchema), organizationControlle
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
 router.delete("/:id", organizationController.deleteOrganization);
+
+
+
+/**
+ * @openapi
+ * /api/v1/organizations/{id}/notification-preferences:
+ *   put:
+ *     summary: Update notification preferences
+ *     tags: [Organization]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateNotificationPreferencesSchema'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.patch("/:id/notification-preferences", validateBody(updateNotificationPreferencesSchema), organizationController.updateNotificationPreferences);
 
 export default router;
