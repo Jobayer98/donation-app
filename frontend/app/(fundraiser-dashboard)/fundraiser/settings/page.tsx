@@ -1,46 +1,114 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Camera,
-  Save,
-  Shield,
-  Users,
-  Building2,
-  Mail,
-  Trash2,
-} from "lucide-react";
-
-// Mock Team Members
-const teamMembers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@org.com",
-    role: "Admin",
-    avatar: "https://github.com/shadcn.png",
-  },
-  {
-    id: 2,
-    name: "Sarah Smith",
-    email: "sarah@org.com",
-    role: "Editor",
-    avatar: "https://github.com/shadcn.png",
-  },
-];
+import { Camera, Save, Building2, Mail } from "lucide-react";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 export default function FundraiserSettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [orgData, setOrgData] = useState({
+    id: "",
+    name: "",
+    email: "",
+    phone: "",
+    mission: "",
+    domain: "",
+    logo: "",
+  });
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [notifPrefs, setNotifPrefs] = useState({
+    donationAlert: false,
+    donationAlertEmail: false,
+    weeklySummary: false,
+    monthlySummary: false,
+  });
 
-  const handleSave = () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [orgRes, notifRes] = await Promise.all([
+          api.get("/organizations"),
+          api.get("/organizations/notification-preferences"),
+        ]);
+
+        const org = orgRes.data.data;
+        setOrgData({
+          id: org.id,
+          name: org.name || "",
+          email: org.email || "",
+          phone: org.phone || "",
+          mission: org.description || "",
+          domain: org.customDomain || "",
+          logo: org.logo || "",
+        });
+
+        setNotifPrefs(notifRes.data.data);
+      } catch (error) {
+        toast.error("Failed to load data");
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = async () => {
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+    try {
+      const formData = new FormData();
+      formData.append("name", orgData.name);
+      formData.append("email", orgData.email);
+      formData.append("phone", orgData.phone);
+      formData.append("description", orgData.mission);
+      if (logoFile) {
+        formData.append("logo", logoFile);
+      }
+
+      await api.patch(`/organizations/${orgData.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Organization updated successfully");
+    } catch (error) {
+      toast.error("Failed to update organization");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNotifToggle = async (key: keyof typeof notifPrefs) => {
+    const newPrefs = { ...notifPrefs, [key]: !notifPrefs[key] };
+    setNotifPrefs(newPrefs);
+    try {
+      const res = await api.patch(
+        `/organizations/${orgData.id}/notification-preferences`,
+        newPrefs,
+      );
+      toast.success(res.data.message || "Notification preferences updated");
+    } catch (error: any) {
+      setNotifPrefs(notifPrefs);
+      toast.error(
+        error.response?.data?.message || "Failed to update preferences",
+      );
+    }
   };
 
   return (
@@ -50,7 +118,7 @@ export default function FundraiserSettingsPage() {
           Organization Settings
         </h1>
         <p className="text-gray-500 text-sm">
-          Manage your organization profile, team, and preferences.
+          Manage your organization profile and preferences.
         </p>
       </div>
 
@@ -61,12 +129,6 @@ export default function FundraiserSettingsPage() {
             className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md px-4 py-1.5 text-sm"
           >
             <Building2 className="h-4 w-4 mr-2" /> Organization
-          </TabsTrigger>
-          <TabsTrigger
-            value="team"
-            className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md px-4 py-1.5 text-sm"
-          >
-            <Users className="h-4 w-4 mr-2" /> Team
           </TabsTrigger>
           <TabsTrigger
             value="notifications"
@@ -82,11 +144,30 @@ export default function FundraiserSettingsPage() {
             {/* Logo Section */}
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <Avatar className="h-20 w-20 rounded-lg">
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage
+                  src={
+                    logoPreview ||
+                    orgData.logo ||
+                    "https://github.com/shadcn.png"
+                  }
+                />
                 <AvatarFallback>ORG</AvatarFallback>
               </Avatar>
               <div className="space-y-2">
-                <Button variant="outline" size="sm" className="gap-1.5">
+                <input
+                  type="file"
+                  id="logo-upload"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogoChange}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => document.getElementById("logo")?.click()}
+                  type="button"
+                >
                   <Camera className="h-3.5 w-3.5" /> Change Logo
                 </Button>
                 <p className="text-xs text-gray-400">
@@ -101,7 +182,10 @@ export default function FundraiserSettingsPage() {
                 <Label htmlFor="orgName">Organization Name</Label>
                 <Input
                   id="orgName"
-                  defaultValue="Save The World Foundation"
+                  value={orgData.name}
+                  onChange={(e) =>
+                    setOrgData({ ...orgData, name: e.target.value })
+                  }
                   className="bg-white"
                 />
               </div>
@@ -110,7 +194,10 @@ export default function FundraiserSettingsPage() {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue="contact@savetheworld.org"
+                  value={orgData.email}
+                  onChange={(e) =>
+                    setOrgData({ ...orgData, email: e.target.value })
+                  }
                   className="bg-white"
                 />
               </div>
@@ -119,16 +206,10 @@ export default function FundraiserSettingsPage() {
                 <Input
                   id="phone"
                   type="tel"
-                  defaultValue="+1 (555) 123-4567"
-                  className="bg-white"
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="website">Website URL</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  defaultValue="https://savetheworld.org"
+                  value={orgData.phone}
+                  onChange={(e) =>
+                    setOrgData({ ...orgData, phone: e.target.value })
+                  }
                   className="bg-white"
                 />
               </div>
@@ -138,7 +219,10 @@ export default function FundraiserSettingsPage() {
                   id="mission"
                   rows={3}
                   className="flex w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  defaultValue="Our mission is to empower communities and protect the environment for future generations."
+                  value={orgData.mission}
+                  onChange={(e) =>
+                    setOrgData({ ...orgData, mission: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -156,63 +240,6 @@ export default function FundraiserSettingsPage() {
           </div>
         </TabsContent>
 
-        {/* Team Management Tab */}
-        <TabsContent value="team">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-gray-900">Team Members</h3>
-                <p className="text-sm text-gray-500">
-                  Manage who has access to your dashboard.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                className="text-green-600 border-green-600 hover:bg-green-50"
-              >
-                + Invite Member
-              </Button>
-            </div>
-
-            <div className="divide-y divide-gray-50">
-              {teamMembers.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={member.avatar} />
-                      <AvatarFallback>{member.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {member.name}
-                      </p>
-                      <p className="text-xs text-gray-500">{member.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="secondary"
-                      className="text-xs font-normal bg-gray-100 text-gray-600"
-                    >
-                      {member.role}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-gray-400 hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-
         {/* Notifications Tab */}
         <TabsContent value="notifications">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
@@ -221,11 +248,30 @@ export default function FundraiserSettingsPage() {
             </h3>
 
             <div className="space-y-4">
-              {/* Notification Toggle Item */}
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-800">
                     Donation Alerts
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Receive push notification for every new donation.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={notifPrefs.donationAlert}
+                    onChange={() => handleNotifToggle("donationAlert")}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-800">
+                    Donation Email Alerts
                   </p>
                   <p className="text-xs text-gray-500">
                     Receive an email for every new donation.
@@ -235,28 +281,10 @@ export default function FundraiserSettingsPage() {
                   <input
                     type="checkbox"
                     className="sr-only peer"
-                    defaultChecked
+                    checked={notifPrefs.donationAlertEmail}
+                    onChange={() => handleNotifToggle("donationAlertEmail")}
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                </label>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    Campaign Milestones
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Get notified when campaigns reach 50%, 75%, 100%.
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    defaultChecked
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                 </label>
               </div>
 
@@ -270,8 +298,33 @@ export default function FundraiserSettingsPage() {
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={notifPrefs.weeklySummary}
+                    onChange={() => handleNotifToggle("weeklySummary")}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-800">
+                    Monthly Summary
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Receive a monthly performance report.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={notifPrefs.monthlySummary}
+                    onChange={() => handleNotifToggle("monthlySummary")}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                 </label>
               </div>
             </div>

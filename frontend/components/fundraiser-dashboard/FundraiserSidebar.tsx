@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/fundraiser" },
@@ -24,6 +25,7 @@ const menuItems = [
 
 export default function FundraiserSidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <aside className="hidden md:flex w-64 flex-col bg-slate-900 text-white h-screen sticky top-0">
@@ -78,6 +80,7 @@ export default function FundraiserSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-slate-400 hover:text-red-500 hover:bg-slate-800"
+          onClick={logout}
         >
           <LogOut className="h-5 w-5" />
           Log Out

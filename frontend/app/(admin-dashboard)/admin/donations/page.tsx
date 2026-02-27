@@ -1,29 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
-
-const transactions = [
-  {
-    id: "TXN-001",
-    donor: "John Doe",
-    ngo: "Clean Water",
-    amount: "$100",
-    fee: "$2.50",
-    date: "Oct 25, 2023",
-    status: "Completed",
-  },
-  {
-    id: "TXN-002",
-    donor: "Anonymous",
-    ngo: "Education for All",
-    amount: "$50",
-    fee: "$1.25",
-    date: "Oct 24, 2023",
-    status: "Completed",
-  },
-];
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { adminApi } from "@/lib/api/admin";
 
 export default function AdminDonationsPage() {
+  const [donations, setDonations] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    adminApi
+      .getRecentDonations(page, 20)
+      .then((res) => {
+        setDonations(res.data.data.donations);
+        setHasMore(res.data.data.length === 20);
+      })
+      .catch(console.error);
+  }, [page]);
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
@@ -39,10 +35,10 @@ export default function AdminDonationsPage() {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
-                  ID
+                  Donor
                 </th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
-                  Donor
+                  Campaign
                 </th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
                   Organization
@@ -51,30 +47,56 @@ export default function AdminDonationsPage() {
                   Amount
                 </th>
                 <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
-                  Platform Fee
-                </th>
-                <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
                   Date
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-gray-50">
-                  <td className="p-4 text-xs text-gray-500">{tx.id}</td>
-                  <td className="p-4 text-sm font-medium text-gray-900">
-                    {tx.donor}
+              {donations.map((d) => (
+                <tr key={d.id} className="hover:bg-gray-50">
+                  <td className="p-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {d.donorName}
+                      </p>
+                      {d.donorEmail && (
+                        <p className="text-xs text-gray-500">{d.donorEmail}</p>
+                      )}
+                    </div>
                   </td>
-                  <td className="p-4 text-sm text-gray-600">{tx.ngo}</td>
+                  <td className="p-4 text-sm text-gray-600">
+                    {d.campaignTitle}
+                  </td>
+                  <td className="p-4 text-sm text-gray-600">
+                    {d.organizationName}
+                  </td>
                   <td className="p-4 text-sm font-bold text-green-600">
-                    {tx.amount}
+                    ${d.amount}
                   </td>
-                  <td className="p-4 text-sm text-gray-600">{tx.fee}</td>
-                  <td className="p-4 text-sm text-gray-500">{tx.date}</td>
+                  <td className="p-4 text-sm text-gray-500">
+                    {new Date(d.createdAt).toLocaleDateString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="flex justify-between items-center p-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600">Page {page}</span>
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasMore}
+          >
+            Next
+          </Button>
         </div>
       </div>
     </div>

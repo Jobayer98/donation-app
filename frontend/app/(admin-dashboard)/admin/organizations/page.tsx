@@ -1,41 +1,32 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const ngos = [
-  {
-    id: 1,
-    name: "Clean Water Initiative",
-    email: "contact@cleanwater.org",
-    status: "Active",
-    raised: "$45,000",
-  },
-  {
-    id: 2,
-    name: "Education for All",
-    email: "admin@eduall.org",
-    status: "Pending Review",
-    raised: "$0",
-  },
-  {
-    id: 3,
-    name: "Green Earth",
-    email: "team@greenearth.org",
-    status: "Suspended",
-    raised: "$12,000",
-  },
-];
+import { adminApi } from "@/lib/api/admin";
 
 export default function AdminNGOsPage() {
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    adminApi
+      .getOrganizations(page, 20)
+      .then((res) => {
+        setOrganizations(res.data.data.organizations);
+        setHasMore(res.data.data.length === 20);
+      })
+      .catch(console.error);
+  }, [page]);
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
@@ -58,7 +49,10 @@ export default function AdminNGOsPage() {
                 Status
               </th>
               <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
-                Total Raised
+                Plan
+              </th>
+              <th className="p-4 text-xs font-semibold text-gray-500 uppercase">
+                Campaigns
               </th>
               <th className="p-4 text-xs font-semibold text-gray-500 uppercase text-right">
                 Actions
@@ -66,33 +60,32 @@ export default function AdminNGOsPage() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {ngos.map((ngo) => (
-              <tr key={ngo.id} className="hover:bg-gray-50">
+            {organizations.map((org) => (
+              <tr key={org.id} className="hover:bg-gray-50">
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
-                      {ngo.name.charAt(0)}
+                      {org.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{ngo.name}</p>
-                      <p className="text-xs text-gray-500">{ngo.email}</p>
+                      <p className="font-medium text-gray-900">{org.name}</p>
+                      <p className="text-xs text-gray-500">{org.ownerEmail}</p>
                     </div>
                   </div>
                 </td>
                 <td className="p-4">
                   <Badge
-                    className={`text-xs ${
-                      ngo.status === "Active"
-                        ? "bg-green-50 text-green-700"
-                        : ngo.status === "Pending Review"
-                          ? "bg-yellow-50 text-yellow-700"
-                          : "bg-red-50 text-red-700"
-                    }`}
+                    className={`text-xs ${org.isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
                   >
-                    {ngo.status}
+                    {org.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </td>
-                <td className="p-4 text-sm text-gray-600">{ngo.raised}</td>
+                <td className="p-4 text-sm text-gray-600">
+                  {org.planName || "No Plan"}
+                </td>
+                <td className="p-4 text-sm text-gray-600">
+                  {org.campaignCount}
+                </td>
                 <td className="p-4 text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -101,11 +94,9 @@ export default function AdminNGOsPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem className="gap-2">
-                        <Check className="h-4 w-4 text-green-600" /> Approve
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-2 text-red-600 focus:text-red-600">
-                        <X className="h-4 w-4" /> Suspend
+                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuItem>
+                        {org.isActive ? "Deactivate" : "Activate"}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -114,6 +105,23 @@ export default function AdminNGOsPage() {
             ))}
           </tbody>
         </table>
+        <div className="flex justify-between items-center p-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600">Page {page}</span>
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasMore}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -24,6 +25,7 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <aside className="hidden md:flex w-64 flex-col bg-white border-r border-gray-100 h-screen sticky top-0">
@@ -78,6 +80,7 @@ export default function Sidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-gray-500 hover:text-red-600 hover:bg-red-50"
+          onClick={logout}
         >
           <LogOut className="h-5 w-5" />
           Log Out
