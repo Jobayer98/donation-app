@@ -14,7 +14,7 @@ router.use(isAuthenticated, authorize("FUND_RAISER"), requireVerified);
 
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns:
+ * /api/v1/fundraiser/campaigns:
  *   post:
  *     summary: Create campaign
  *     tags: [Fundraiser]
@@ -56,7 +56,7 @@ router.post("/campaigns", validateBody(CreateCampaignSchema), checkCampaignLimit
 
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/{id}:
+ * /api/v1/fundraiser/campaigns/{id}:
  *   patch:
  *     summary: Update campaign
  *     tags: [Fundraiser]
@@ -104,7 +104,7 @@ router.patch("/campaigns/:id", validateBody(UpdateCampaignSchema), updateCampaig
 
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/{id}/publish:
+ * /api/v1/fundraiser/campaigns/{id}/publish:
  *   patch:
  *     summary: Publish campaign
  *     tags: [Fundraiser]
@@ -146,7 +146,7 @@ router.patch("/campaigns/:id/publish", publishCampaign);
 
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/{id}/close:
+ * /api/v1/fundraiser/campaigns/{id}/close:
  *   patch:
  *     summary: Close campaign
  *     tags: [Fundraiser]
@@ -187,7 +187,7 @@ router.patch("/campaigns/:id/publish", publishCampaign);
 router.patch("/campaigns/:id/close", closeCampaign);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/overview:
+ * /api/v1/fundraiser/overview:
  *   get:
  *     summary: Get fundraiser overview
  *     tags: [Fundraiser]
@@ -222,7 +222,7 @@ router.patch("/campaigns/:id/close", closeCampaign);
 router.get("/overview", fundraiserOverview);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns:
+ * /api/v1/fundraiser/campaigns:
  *   get:
  *     summary: Get fundraiser campaigns
  *     tags: [Fundraiser]
@@ -264,7 +264,7 @@ router.get("/overview", fundraiserOverview);
 router.get("/campaigns", fundraiserCampaigns);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/top:
+ * /api/v1/fundraiser/campaigns/top:
  *   get:
  *     summary: Get top campaigns
  *     tags: [Fundraiser]
@@ -299,7 +299,7 @@ router.get("/campaigns", fundraiserCampaigns);
 router.get("/campaigns/top", getTopCampaigns);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/{id}:
+ * /api/v1/fundraiser/campaigns/{id}:
  *   get:
  *     summary: Get fundraiser campaign
  *     tags: [Fundraiser]
@@ -340,7 +340,7 @@ router.get("/campaigns/top", getTopCampaigns);
 router.get("/campaigns/:id", findOneCampaign);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/{id}/donations:
+ * /api/v1/fundraiser/campaigns/{id}/donations:
  *   get:
  *     summary: Get campaign donations
  *     tags: [Fundraiser]
@@ -382,7 +382,7 @@ router.get("/campaigns/:id/donations", getCampaignDonations);
 
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/donations:
+ * /api/v1/fundraiser/donations:
  *   get:
  *     summary: Get all donations
  *     tags: [Fundraiser]
@@ -423,7 +423,7 @@ router.get("/campaigns/:id/donations", getCampaignDonations);
 router.get("/donations", getAllDonations);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/campaigns/{id}/stats:
+ * /api/v1/fundraiser/campaigns/{id}/stats:
  *   get:
  *     summary: Get campaign stats
  *     tags: [Fundraiser]
@@ -464,7 +464,7 @@ router.get("/donations", getAllDonations);
 router.get("/campaigns/:id/stats", getCampaignStats);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/payment-providers:
+ * /api/v1/fundraiser/payment-providers:
  *   post:
  *     summary: Create payment provider
  *     tags: [Fundraiser]
@@ -505,7 +505,7 @@ router.get("/campaigns/:id/stats", getCampaignStats);
 router.post("/payment-providers", validateBody(CreatePaymentProviderSchema), checkPaymentProviderLimit, createPaymentProvider);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/payment-providers:
+ * /api/v1/fundraiser/payment-providers:
  *   get:
  *     summary: Get payment providers
  *     tags: [Fundraiser]
@@ -540,7 +540,7 @@ router.post("/payment-providers", validateBody(CreatePaymentProviderSchema), che
 router.get("/payment-providers", getMyPaymentProviders);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/payment-providers/{id}:
+ * /api/v1/fundraiser/payment-providers/{id}:
  *   put:
  *     summary: Update payment provider
  *     tags: [Fundraiser]
@@ -587,7 +587,7 @@ router.get("/payment-providers", getMyPaymentProviders);
 router.put("/payment-providers/:id", validateBody(UpdatePaymentProviderSchema), updatePaymentProvider);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/payment-providers/{id}:
+ * /api/v1/fundraiser/payment-providers/{id}:
  *   delete:
  *     summary: Delete payment provider
  *     tags: [Fundraiser]
@@ -628,7 +628,7 @@ router.put("/payment-providers/:id", validateBody(UpdatePaymentProviderSchema), 
 router.delete("/payment-providers/:id", deletePaymentProvider);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/payment-providers/{id}/toggle:
+ * /api/v1/fundraiser/payment-providers/{id}/toggle:
  *   patch:
  *     summary: Toggle payment provider
  *     tags: [Fundraiser]
@@ -669,7 +669,7 @@ router.delete("/payment-providers/:id", deletePaymentProvider);
 router.patch("/payment-providers/:id/toggle", togglePaymentProvider);
 /**
  * @openapi
- * /api/v1/dashboard/fundraiser/payment-providers/{id}/default:
+ * /api/v1/fundraiser/payment-providers/{id}/default:
  *   patch:
  *     summary: Set default payment provider
  *     tags: [Fundraiser]

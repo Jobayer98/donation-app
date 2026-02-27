@@ -22,34 +22,80 @@ class AuthService {
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
-        const user = await prisma.user.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: hashPass,
-                role: data.role,
-                verificationToken
-            },
-            select: { id: true, role: true, email: true, name: true }
+        // Use transaction to create user, organization, and subscription atomically
+        const result = await prisma.$transaction(async (tx) => {
+            // Create user
+            const user = await tx.user.create({
+                data: {
+                    name: data.name,
+                    email: data.email,
+                    password: hashPass,
+                    role: data.role,
+                    verificationToken
+                },
+                select: { id: true, role: true, email: true, name: true }
+            });
+
+            // If fundraiser, auto-create organization and FREE subscription
+            if (data.role === 'FUND_RAISER') {
+                // Generate unique slug from name
+                const baseSlug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                const slug = `${baseSlug}-${user.id.slice(0, 8)}`;
+
+                // Create organization
+                const organization = await tx.organization.create({
+                    data: {
+                        name: data.name,
+                        slug,
+                        ownerId: user.id,
+                        email: data.email,
+                    }
+                });
+
+                // Get FREE plan
+                const freePlan = await tx.plan.findUnique({
+                    where: { type: 'FREE' }
+                });
+
+                if (!freePlan) {
+                    throw new Error("FREE plan not found. Please run database seed.");
+                }
+
+                // Create FREE subscription
+                const now = new Date();
+                const endDate = new Date(now);
+                endDate.setFullYear(endDate.getFullYear() + 100); // Free forever
+
+                await tx.subscription.create({
+                    data: {
+                        organizationId: organization.id,
+                        planId: freePlan.id,
+                        status: 'ACTIVE',
+                        currentPeriodStart: now,
+                        currentPeriodEnd: endDate,
+                    }
+                });
+            }
+
+            return user;
         });
 
         // Add email jobs to background queue in parallel
-
         await Promise.all([
             addEmailJob({
                 type: 'WELCOME',
-                email: user.email,
-                payload: { name: user.name }
+                email: result.email,
+                payload: { name: result.name }
             }),
             addEmailJob({
                 type: 'VERIFICATION',
-                email: user.email,
-                payload: { name: user.name, token: verificationToken }
+                email: result.email,
+                payload: { name: result.name, token: verificationToken }
             })
         ]).catch(err => logger.error("⚠️ Failed to queue emails:", err));
 
-        const token = generateAccessToken({ id: user.id, role: user.role });
-        return { id: user.id, token, message: "Please check your email to verify your account" };
+        const token = generateAccessToken({ id: result.id, role: result.role });
+        return { id: result.id, token, message: "Please check your email to verify your account" };
     }
 
 

@@ -105,7 +105,6 @@ export const fundraiserCampaigns = asyncHandler(
       status = undefined;
     }
 
-    console.log(status)
     const campaigns = await campaignService.getFundraiserCampaigns(
       req.user!.id,
       status as string

@@ -23,8 +23,17 @@ class SubscriptionService {
   }
 
   async getCurrentSubscription(userId: string) {
+    // Get user's organization
+    const organization = await prisma.organization.findFirst({
+      where: { ownerId: userId },
+    });
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found for this user");
+    }
+
     const subscription = await prisma.subscription.findUnique({
-      where: { userId },
+      where: { organizationId: organization.id },
       include: {
         plan: {
           select: {
@@ -55,15 +64,21 @@ class SubscriptionService {
   }
 
   async subscribe(userId: string, planId: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new ApiError(404, "User not found");
+    // Get user's organization
+    const organization = await prisma.organization.findFirst({
+      where: { ownerId: userId },
+    });
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found for this user");
+    }
 
     const plan = await prisma.plan.findUnique({ where: { id: planId } });
     if (!plan) throw new ApiError(404, "Plan not found");
 
     // Check if already has an ACTIVE subscription
     const existing = await prisma.subscription.findUnique({
-      where: { userId },
+      where: { organizationId: organization.id },
     });
 
     if (existing && existing.status === "ACTIVE") {
@@ -75,20 +90,20 @@ class SubscriptionService {
 
     // Free plan - no Stripe needed
     if (plan.type === "FREE") {
-      return this.createFreeSubscription(userId, planId);
+      return this.createFreeSubscription(organization.id, planId);
     }
 
     // Paid plan - create Stripe Checkout Session
-    return this.createStripeCheckoutSession(userId, user.email, planId, plan);
+    return this.createStripeCheckoutSession(organization.id, organization.email || "", planId, plan);
   }
 
-  private async createFreeSubscription(userId: string, planId: string) {
+  private async createFreeSubscription(organizationId: string, planId: string) {
     const now = new Date();
     const endDate = new Date(now);
     endDate.setFullYear(endDate.getFullYear() + 100); // Free forever
 
     return prisma.subscription.upsert({
-      where: { userId },
+      where: { organizationId },
       update: {
         planId,
         status: "ACTIVE",
@@ -98,7 +113,7 @@ class SubscriptionService {
         cancelAtPeriodEnd: false
       },
       create: {
-        userId,
+        organizationId,
         planId,
         status: "ACTIVE",
         currentPeriodStart: now,
@@ -108,10 +123,10 @@ class SubscriptionService {
     });
   }
 
-  private async createStripeCheckoutSession(userId: string, email: string, planId: string, plan: any) {
+  private async createStripeCheckoutSession(organizationId: string, email: string, planId: string, plan: any) {
     // Check for existing customer ID from any previous subscription
     const existingSub = await prisma.subscription.findUnique({
-      where: { userId },
+      where: { organizationId },
       select: { stripeCustomerId: true }
     });
 
@@ -120,7 +135,7 @@ class SubscriptionService {
     if (!customerId) {
       const customer = await stripe.customers.create({
         email,
-        metadata: { userId }
+        metadata: { organizationId }
       });
       customerId = customer.id;
     }
@@ -145,7 +160,7 @@ class SubscriptionService {
         },
       ],
       mode: "subscription",
-      metadata: { userId, planId },
+      metadata: { organizationId, planId },
       success_url: `${appConfig.base_url}/api/subscriptions/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appConfig.base_url}/api/subscriptions/cancel`,
     });
@@ -158,17 +173,17 @@ class SubscriptionService {
       expand: ["subscription"],
     });
 
-    const userId = session.metadata?.userId;
+    const organizationId = session.metadata?.organizationId;
     const planId = session.metadata?.planId;
 
-    if (!userId || !planId) {
+    if (!organizationId || !planId) {
       throw new ApiError(400, "Missing metadata in Stripe session");
     }
 
     const stripeSubscription = session.subscription as any;
 
     return prisma.subscription.upsert({
-      where: { userId },
+      where: { organizationId },
       update: {
         planId,
         status: "ACTIVE",
@@ -179,7 +194,7 @@ class SubscriptionService {
         cancelAtPeriodEnd: false
       },
       create: {
-        userId,
+        organizationId,
         planId,
         status: "ACTIVE",
         stripeSubscriptionId: stripeSubscription.id,
@@ -192,8 +207,17 @@ class SubscriptionService {
   }
 
   async cancelSubscription(userId: string) {
+    // Get user's organization
+    const organization = await prisma.organization.findFirst({
+      where: { ownerId: userId },
+    });
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found for this user");
+    }
+
     const subscription = await prisma.subscription.findUnique({
-      where: { userId },
+      where: { organizationId: organization.id },
       include: { plan: true }
     });
 
@@ -209,12 +233,9 @@ class SubscriptionService {
     }
 
     return prisma.subscription.update({
-      where: { userId },
+      where: { organizationId: organization.id },
       data: {
         cancelAtPeriodEnd: true,
-        // We set to active until period end, typically logic elsewhere would check currentPeriodEnd
-        // or a webhook would set it to CANCELED when it actually ends.
-        // For now, let's mark it as CANCELED to reflect the user's intent.
         status: 'CANCELED'
       }
     });
@@ -224,6 +245,13 @@ class SubscriptionService {
     userId: string,
     limitType: "campaigns" | "paymentProviders",
   ): Promise<boolean> {
+    // Get user's organization
+    const organization = await prisma.organization.findFirst({
+      where: { ownerId: userId },
+    });
+
+    if (!organization) return false;
+
     const subscription = await this.getCurrentSubscription(userId);
     const limits = subscription.plan?.limits as any;
 
@@ -240,9 +268,9 @@ class SubscriptionService {
     // Count current usage
     const count =
       limitType === "campaigns"
-        ? await prisma.campaign.count({ where: { fundraiserId: userId } })
+        ? await prisma.campaign.count({ where: { organizationId: organization.id } })
         : await prisma.paymentProvider.count({
-          where: { fundRaiserId: userId },
+          where: { organizationId: organization.id },
         });
 
     return count < maxLimit;

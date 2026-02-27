@@ -13,7 +13,7 @@ router.use(isAuthenticated, authorize("ADMIN"));
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/overview:
+ * /api/v1/admin/overview:
  *   get:
  *     summary: Get admin overview
  *     tags: [Admin]
@@ -49,7 +49,7 @@ router.get("/overview", adminController.adminOverview);
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/campaigns:
+ * /api/v1/admin/campaigns:
  *   get:
  *     summary: Get admin campaigns
  *     tags: [Admin]
@@ -85,7 +85,7 @@ router.get("/campaigns", adminController.adminCampaigns);
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/users:
+ * /api/v1/admin/users:
  *   get:
  *     summary: Get admin users
  *     tags: [Admin]
@@ -121,7 +121,7 @@ router.get("/users", adminController.adminUsers);
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/campaigns/{id}/status:
+ * /api/v1/admin/campaigns/{id}/status:
  *   patch:
  *     summary: Update campaign status
  *     tags: [Admin]
@@ -163,7 +163,7 @@ router.patch("/campaigns/:id/status", validateBody(UpdateCampaignStatusSchema), 
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/users/{id}/role:
+ * /api/v1/admin/users/{id}/role:
  *   patch:
  *     summary: Update user role
  *     tags: [Admin]
@@ -207,7 +207,7 @@ router.patch("/users/:id/role", validateBody(UpdateUserRoleSchema), adminControl
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/plans:
+ * /api/v1/admin/plans:
  *   get:
  *     summary: Get admin plans
  *     tags: [Admin]
@@ -243,7 +243,7 @@ router.get("/plans", adminPlanController.getAllPlans);
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/plans:
+ * /api/v1/admin/plans:
  *   post:
  *     summary: Create plan
  *     tags: [Admin]
@@ -285,7 +285,7 @@ router.post("/plans", validateBody(createPlanSchema), adminPlanController.create
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/plans/{id}:
+ * /api/v1/admin/plans/{id}:
  *   put:
  *     summary: Update plan
  *     tags: [Admin]
@@ -333,7 +333,7 @@ router.put("/plans/:id", validateBody(updatePlanSchema), adminPlanController.upd
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/plans/{id}/toggle:
+ * /api/v1/admin/plans/{id}/toggle:
  *   patch:
  *     summary: Toggle plan status
  *     tags: [Admin]
@@ -376,7 +376,7 @@ router.patch("/plans/:id/toggle", adminPlanController.togglePlanStatus);
 // Subscription Management
 /**
  * @openapi
- * /api/v1/dashboard/admin/subscriptions:
+ * /api/v1/admin/subscriptions:
  *   get:
  *     summary: Get admin subscriptions
  *     tags: [Admin]
@@ -412,7 +412,7 @@ router.get("/subscriptions", adminPlanController.getAllSubscriptions);
 
 /**
  * @openapi
- * /api/v1/dashboard/admin/subscriptions/stats:
+ * /api/v1/admin/subscriptions/stats:
  *   get:
  *     summary: Get admin subscription stats
  *     tags: [Admin]

@@ -2,14 +2,22 @@ import { Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler";
 import paymentProviderService from "../services/paymentProvider.service";
 import { decrypt } from "../utils/crypto";
+import organizationService from "../services/organization.service";
+import { ApiError } from "../utils/ApiError";
 
 export const createPaymentProvider = asyncHandler(
   async (req: Request, res: Response) => {
     const { name, config, currency } = req.body;
+    const organization = await organizationService.getUserOrganization(req.user!.id);
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
     const provider = await paymentProviderService.create(
       name,
       config,
-      req.user!.id,
+      organization.id,
       currency
     );
     res.status(201).json({
@@ -22,8 +30,14 @@ export const createPaymentProvider = asyncHandler(
 
 export const getMyPaymentProviders = asyncHandler(
   async (req: Request, res: Response) => {
+    const organization = await organizationService.getUserOrganization(req.user!.id);
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
     const providers = await paymentProviderService.findByFundraiser(
-      req.user!.id,
+      organization.id,
     );
     res.json({ success: true, data: providers.map((provider) => ({ ...provider, config: JSON.parse(decrypt(provider.config as string)) })) });
   },
@@ -32,9 +46,15 @@ export const getMyPaymentProviders = asyncHandler(
 export const updatePaymentProvider = asyncHandler(
   async (req: Request, res: Response) => {
     const { name, config, currency } = req.body;
+    const organization = await organizationService.getUserOrganization(req.user!.id);
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
     const provider = await paymentProviderService.update(
       String(req.params.id),
-      req.user!.id,
+      organization.id,
       { name, config, currency }
     );
     res.json({
@@ -47,9 +67,15 @@ export const updatePaymentProvider = asyncHandler(
 
 export const deletePaymentProvider = asyncHandler(
   async (req: Request, res: Response) => {
+    const organization = await organizationService.getUserOrganization(req.user!.id);
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
     await paymentProviderService.delete(
       String(req.params.id),
-      req.user!.id
+      organization.id
     );
     res.json({
       success: true,
@@ -60,9 +86,15 @@ export const deletePaymentProvider = asyncHandler(
 
 export const togglePaymentProvider = asyncHandler(
   async (req: Request, res: Response) => {
+    const organization = await organizationService.getUserOrganization(req.user!.id);
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
     const provider = await paymentProviderService.toggleStatus(
       String(req.params.id),
-      req.user!.id,
+      organization.id,
     );
     res.json({
       success: true,
@@ -74,9 +106,15 @@ export const togglePaymentProvider = asyncHandler(
 
 export const setDefaultProvider = asyncHandler(
   async (req: Request, res: Response) => {
+    const organization = await organizationService.getUserOrganization(req.user!.id);
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
     const provider = await paymentProviderService.setDefault(
       String(req.params.id),
-      req.user!.id
+      organization.id
     );
     res.json({
       success: true,

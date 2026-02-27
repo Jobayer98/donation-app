@@ -28,7 +28,7 @@ export const handlePaymentSuccess = asyncHandler(
       transactionId: tran_id,
     });
     await donationService.sendDonationEmails(tran_id);
-    res.redirect("http://localhost:3000/success");
+    res.redirect("http://localhost:4000/success");
   },
 );
 
@@ -42,7 +42,7 @@ export const handlePaymentFail = asyncHandler(
       val_id,
       transactionId: tran_id,
     });
-    res.redirect("http://localhost:3000/failed");
+    res.redirect("http://localhost:4000/failed");
   },
 );
 
@@ -56,6 +56,6 @@ export const handlePaymentCancel = asyncHandler(
       val_id,
       transactionId: tran_id,
     });
-    res.redirect("http://localhost:3000/cancel");
+    res.redirect("http://localhost:4000/cancel");
   },
 );

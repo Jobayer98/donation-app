@@ -30,8 +30,8 @@ router.use("/onboarding", onboardingRoute);
 
 // Notifications and dashboards
 router.use("/notifications", notificationRoute);
-router.use("/dashboard/fundraiser", fundraiserDashboardRoute);
-router.use("/dashboard/admin", adminRoute);
+router.use("/fundraiser", fundraiserDashboardRoute);
+router.use("/admin", adminRoute);
 
 // Dev-only routes: mount only when not in production
 if (process.env.NODE_ENV !== "production") {

@@ -12,11 +12,11 @@ class SSLCommerzProvider implements IPaymentProvider {
   async createPayment(paymentInfo: PaymentInfo) {
     const campaign = await prisma.campaign.findUnique({
       where: { id: paymentInfo.campaignId },
-      select: { fundraiserId: true },
+      select: { organizationId: true },
     });
 
     const config = await paymentProviderService.getConfig(
-      campaign!.fundraiserId,
+      campaign!.organizationId,
       paymentInfo.providerName,
     );
     if (!config) throw new ApiError(400, "Payment provider not configured");
@@ -45,11 +45,11 @@ class SSLCommerzProvider implements IPaymentProvider {
   async validatePayment(val_id: string, transactionId: string) {
     const donation = await prisma.donation.findUnique({
       where: { transactionId },
-      include: { campaign: { select: { fundraiserId: true } } },
+      include: { campaign: { select: { organizationId: true } } },
     });
 
     const config = await paymentProviderService.getConfig(
-      donation!.campaign.fundraiserId,
+      donation!.campaign.organizationId,
       "sslcommerz",
     );
     if (!config) throw new ApiError(400, "Payment provider not configured");
@@ -73,7 +73,7 @@ class SSLCommerzProvider implements IPaymentProvider {
         donation!.campaignId,
         Number(donation!.amount),
       );
-      await paymentLogService.create(response.data, campaign.fundraiserId);
+      await paymentLogService.create(response.data, campaign.organizationId);
     }
   }
 }

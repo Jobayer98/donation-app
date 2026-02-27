@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError";
 import axios from "axios";
 
 class PaymentProviderService {
-  async create(name: string, config: any, fundRaiserId: string, currency: string = "BDT") {
+  async create(name: string, config: any, organizationId: string, currency: string = "BDT") {
     // Validate credentials before saving
     await this.validateCredentials(name, config);
 
@@ -12,14 +12,14 @@ class PaymentProviderService {
 
     // Check if this is the first provider for the fundraiser
     const existingCount = await prisma.paymentProvider.count({
-      where: { fundRaiserId }
+      where: { organizationId }
     });
 
     return prisma.paymentProvider.create({
       data: {
         name,
         config: encryptedConfig,
-        fundRaiserId,
+        organizationId,
         currency,
         isDefault: existingCount === 0 // First provider is default
       },
@@ -27,9 +27,9 @@ class PaymentProviderService {
     });
   }
 
-  async update(id: string, fundRaiserId: string, data: { name?: string; config?: any; currency?: string }) {
+  async update(id: string, organizationId: string, data: { name?: string; config?: any; currency?: string }) {
     const provider = await prisma.paymentProvider.findUnique({
-      where: { id, fundRaiserId }
+      where: { id, organizationId }
     });
 
     if (!provider) {
@@ -47,15 +47,15 @@ class PaymentProviderService {
     if (data.config) updateData.config = encrypt(JSON.stringify(data.config));
 
     return prisma.paymentProvider.update({
-      where: { id, fundRaiserId },
+      where: { id, organizationId },
       data: updateData,
       select: { id: true, name: true, currency: true, isActive: true, isDefault: true },
     });
   }
 
-  async delete(id: string, fundRaiserId: string) {
+  async delete(id: string, organizationId: string) {
     const provider = await prisma.paymentProvider.findUnique({
-      where: { id, fundRaiserId }
+      where: { id, organizationId }
     });
 
     if (!provider) {
@@ -67,21 +67,21 @@ class PaymentProviderService {
     }
 
     await prisma.paymentProvider.delete({
-      where: { id, fundRaiserId }
+      where: { id, organizationId }
     });
   }
 
-  async findByFundraiser(fundRaiserId: string) {
+  async findByFundraiser(organizationId: string) {
     return prisma.paymentProvider.findMany({
-      where: { fundRaiserId },
+      where: { organizationId },
       select: { id: true, name: true, currency: true, isActive: true, isDefault: true, createdAt: true, config: true },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }]
     });
   }
 
-  async toggleStatus(id: string, fundRaiserId: string) {
+  async toggleStatus(id: string, organizationId: string) {
     const provider = await prisma.paymentProvider.findUnique({
-      where: { id, fundRaiserId },
+      where: { id, organizationId },
     });
 
     if (!provider) {
@@ -93,15 +93,15 @@ class PaymentProviderService {
     }
 
     return prisma.paymentProvider.update({
-      where: { id, fundRaiserId },
+      where: { id, organizationId },
       data: { isActive: !provider.isActive },
       select: { id: true, isActive: true },
     });
   }
 
-  async setDefault(id: string, fundRaiserId: string) {
+  async setDefault(id: string, organizationId: string) {
     const provider = await prisma.paymentProvider.findUnique({
-      where: { id, fundRaiserId }
+      where: { id, organizationId }
     });
 
     if (!provider) {
@@ -116,18 +116,18 @@ class PaymentProviderService {
     await prisma.$transaction([
       // Remove default from all providers
       prisma.paymentProvider.updateMany({
-        where: { fundRaiserId },
+        where: { organizationId },
         data: { isDefault: false }
       }),
       // Set new default
       prisma.paymentProvider.update({
-        where: { id, fundRaiserId },
+        where: { id, organizationId },
         data: { isDefault: true }
       })
     ]);
 
     return prisma.paymentProvider.findUnique({
-      where: { id, fundRaiserId },
+      where: { id, organizationId },
       select: { id: true, name: true, isDefault: true }
     });
   }
@@ -135,7 +135,7 @@ class PaymentProviderService {
   async getActiveByCampaign(campaignId: string) {
     const campaign = await prisma.campaign.findUnique({
       where: { id: campaignId },
-      select: { fundraiserId: true },
+      select: { organizationId: true },
     });
 
     if (!campaign) {
@@ -143,15 +143,15 @@ class PaymentProviderService {
     }
 
     return prisma.paymentProvider.findMany({
-      where: { fundRaiserId: campaign.fundraiserId, isActive: true },
+      where: { organizationId: campaign.organizationId, isActive: true },
       select: { id: true, name: true, currency: true, isDefault: true },
       orderBy: { isDefault: 'desc' }
     });
   }
 
-  async getConfig(fundRaiserId: string, providerName: string) {
+  async getConfig(organizationId: string, providerName: string) {
     const provider = await prisma.paymentProvider.findFirst({
-      where: { fundRaiserId, name: providerName, isActive: true },
+      where: { organizationId, name: providerName, isActive: true },
       select: { config: true, currency: true },
     });
 

@@ -1,4 +1,4 @@
-import { emailLayout } from './layout';
+import { emailLayout } from "./layout";
 
 interface DonationNotification {
   fundraiserName: string;
@@ -10,8 +10,10 @@ interface DonationNotification {
 }
 
 export const donationNotificationEmail = (details: DonationNotification) => {
-  const donorDisplay = details.isAnonymous ? 'Anonymous Donor' : details.donorName;
-  
+  const donorDisplay = details.isAnonymous
+    ? "Anonymous Donor"
+    : details.donorName;
+
   const content = `
     <h2>New Donation Received! 🎉</h2>
     <p>Hi ${details.fundraiserName},</p>
@@ -25,7 +27,7 @@ export const donationNotificationEmail = (details: DonationNotification) => {
     </div>
     
     <p>This brings you one step closer to your fundraising goal. Keep up the great work!</p>
-    <a href="${process.env.BASE_URL}/dashboard/fundraiser/campaigns" class="button">View Dashboard</a>
+    <a href="${process.env.BASE_URL}/fundraiser/campaigns" class="button">View Dashboard</a>
     <p>Best regards,<br>The Donation App Team</p>
   `;
   return emailLayout(content);
