@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, User } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import Link from "next/link";
 
 export default function Header() {

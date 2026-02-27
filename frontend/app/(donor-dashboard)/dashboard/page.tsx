@@ -13,7 +13,7 @@ export default function DonorDashboardPage() {
             Welcome back, John 👋
           </h1>
           <p className="text-gray-500 text-sm">
-            Here's what's happening with your impact today.
+            Here&apos;s what&apos;s happening with your impact today.
           </p>
         </div>
         <Button className="bg-green-600 hover:bg-green-700 gap-2 shadow-md shadow-green-100">
@@ -33,7 +33,7 @@ export default function DonorDashboardPage() {
 
         {/* Right Column */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-green-600 to-teal-600 rounded-xl p-6 text-white shadow-lg shadow-green-200/50">
+          <div className="bg-linear-to-br from-green-600 to-teal-600 rounded-xl p-6 text-white shadow-lg shadow-green-200/50">
             <h3 className="font-bold text-lg mb-2">Spread the Word</h3>
             <p className="text-white/80 text-sm mb-4">
               Invite friends to join EcoKind. Get $10 credit for every friend

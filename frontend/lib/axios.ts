@@ -11,6 +11,7 @@ api.interceptors.request.use((config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+            document.cookie = `token=${token}; path=/; max-age=86400`;
         }
     }
     return config;
@@ -21,6 +22,8 @@ api.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401 && typeof window !== 'undefined') {
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            document.cookie = 'token=; path=/; max-age=0';
             if (!window.location.pathname.startsWith('/auth')) {
                 window.location.href = '/auth';
             }

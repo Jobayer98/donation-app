@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Heart, HandHeart, Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
 import {
   loginSchema,
   signupSchema,
@@ -39,7 +38,6 @@ export default function AuthPage() {
     password: "",
     terms: false,
   });
-  const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,8 +54,19 @@ export default function AuthPage() {
     try {
       const res = await api.post("/auth/login", loginData);
       if (res.status === 200) {
-        localStorage.setItem("token", res.data.data.token);
-        router.push("/dashboard");
+        const token = res.data.data.token;
+        const user = res.data.data;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        document.cookie = `token=${token}; path=/; max-age=86400`;
+
+        const redirectMap = {
+          DONOR: "/dashboard",
+          FUND_RAISER: "/fundraiser",
+          ADMIN: "/admin",
+        };
+        window.location.href =
+          redirectMap[user.role as keyof typeof redirectMap] || "/";
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
@@ -86,8 +95,12 @@ export default function AuthPage() {
     try {
       const res = await api.post("/auth/register/donor", signupData);
       if (res.status === 200 || res.status === 201) {
-        localStorage.setItem("token", res.data.data.token);
-        router.push("/dashboard");
+        const token = res.data.data.token;
+        const user = res.data.data.user;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        document.cookie = `token=${token}; path=/; max-age=86400`;
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
