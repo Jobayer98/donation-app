@@ -21,7 +21,6 @@ export const updatePlanSchema = z.object({
   limits: z.object({
     maxCampaigns: z.number(),
     maxPaymentProviders: z.number(),
-    transactionFee: z.number()
   }).optional(),
   isActive: z.boolean().optional()
 });

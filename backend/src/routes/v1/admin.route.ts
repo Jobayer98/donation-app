@@ -1,23 +1,254 @@
 import { Router } from "express";
-import { closeCampaign, createCampaign, fundraiserCampaigns, fundraiserOverview, getCampaignDonations, getCampaignStats, publishCampaign, updateCampaign, findOneCampaign, getAllDonations, getTopCampaigns } from "../../../controllers/campaign.controller";
-import { createPaymentProvider, deletePaymentProvider, getMyPaymentProviders, setDefaultProvider, togglePaymentProvider, updatePaymentProvider } from "../../../controllers/paymentProvider.controller";
-import { isAuthenticated, authorize } from "../../../middlewares/auth.middleware";
-import { requireVerified } from "../../../middlewares/verification.middleware";
-import { checkCampaignLimit, checkPaymentProviderLimit } from "../../../middlewares/planLimits.middleware";
-import { validateBody } from "../../../middlewares/validate.middleware";
-import { CreateCampaignSchema, UpdateCampaignSchema } from "../../../schema/campaign.schema";
-import { CreatePaymentProviderSchema, UpdatePaymentProviderSchema } from "../../../schema/paymentProvider.schema";
+import * as adminController from "../../controllers/admin.controller";
+import * as adminPlanController from "../../controllers/adminPlan.controller";
+import { isAuthenticated, authorize } from "../../middlewares/auth.middleware";
+import { validateBody } from "../../middlewares/validate.middleware";
+import { UpdateCampaignStatusSchema } from "../../schema/campaign.schema";
+import { UpdateUserRoleSchema } from "../../schema/user.schema";
+import { createPlanSchema, updatePlanSchema } from "../../schema/adminPlan.schema";
 
 const router = Router();
 
-router.use(isAuthenticated, authorize("FUND_RAISER"), requireVerified);
+router.use(isAuthenticated, authorize("ADMIN"));
 
 /**
  * @openapi
- * /api/v1/fundraiser/campaigns:
+ * /api/v1/admin/overview:
+ *   get:
+ *     summary: Get admin overview
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/overview", adminController.adminOverview);
+
+/**
+ * @openapi
+ * /api/v1/admin/campaigns:
+ *   get:
+ *     summary: Get admin campaigns
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/campaigns", adminController.adminCampaigns);
+
+/**
+ * @openapi
+ * /api/v1/admin/users:
+ *   get:
+ *     summary: Get admin users
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/users", adminController.adminUsers);
+
+router.get("/organizations", adminController.adminOrganizations);
+
+/**
+ * @openapi
+ * /api/v1/admin/campaigns/{id}/status:
+ *   patch:
+ *     summary: Update campaign status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.patch("/campaigns/:id/status", validateBody(UpdateCampaignStatusSchema), adminController.adminCampaignStatus);
+
+/**
+ * @openapi
+ * /api/v1/admin/users/{id}/role:
+ *   patch:
+ *     summary: Update user role
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.patch("/users/:id/role", validateBody(UpdateUserRoleSchema), adminController.updateUserRole);
+
+// Plan Management
+
+/**
+ * @openapi
+ * /api/v1/admin/plans:
+ *   get:
+ *     summary: Get admin plans
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/plans", adminPlanController.getAllPlans);
+
+/**
+ * @openapi
+ * /api/v1/admin/plans:
  *   post:
- *     summary: Create campaign
- *     tags: [Fundraiser]
+ *     summary: Create plan
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -25,7 +256,7 @@ router.use(isAuthenticated, authorize("FUND_RAISER"), requireVerified);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CampaignSchema'
+ *             $ref: '#/components/schemas/PlanSchema'
  *     responses:
  *       200:
  *         description: Success
@@ -52,498 +283,14 @@ router.use(isAuthenticated, authorize("FUND_RAISER"), requireVerified);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.post("/campaigns", validateBody(CreateCampaignSchema), checkCampaignLimit, createCampaign);
+router.post("/plans", validateBody(createPlanSchema), adminPlanController.createPlan);
 
 /**
  * @openapi
- * /api/v1/fundraiser/campaigns/{id}:
- *   patch:
- *     summary: Update campaign
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CampaignSchema'
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.patch("/campaigns/:id", validateBody(UpdateCampaignSchema), updateCampaign);
-
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns/{id}/publish:
- *   patch:
- *     summary: Publish campaign
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.patch("/campaigns/:id/publish", publishCampaign);
-
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns/{id}/close:
- *   patch:
- *     summary: Close campaign
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.patch("/campaigns/:id/close", closeCampaign);
-/**
- * @openapi
- * /api/v1/fundraiser/overview:
- *   get:
- *     summary: Get fundraiser overview
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/overview", fundraiserOverview);
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns:
- *   get:
- *     summary: Get fundraiser campaigns
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: status
- *         in: query
- *         required: false
- *         schema:
- *           type: string
- *           enum: ["ACTIVE", "PAUSED", "DRAFT", "COMPLETED"]
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/campaigns", fundraiserCampaigns);
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns/top:
- *   get:
- *     summary: Get top campaigns
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/campaigns/top", getTopCampaigns);
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns/{id}:
- *   get:
- *     summary: Get fundraiser campaign
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/campaigns/:id", findOneCampaign);
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns/{id}/donations:
- *   get:
- *     summary: Get campaign donations
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/campaigns/:id/donations", getCampaignDonations);
-
-/**
- * @openapi
- * /api/v1/fundraiser/donations:
- *   get:
- *     summary: Get all donations
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/donations", getAllDonations);
-/**
- * @openapi
- * /api/v1/fundraiser/campaigns/{id}/stats:
- *   get:
- *     summary: Get campaign stats
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/campaigns/:id/stats", getCampaignStats);
-/**
- * @openapi
- * /api/v1/fundraiser/payment-providers:
- *   post:
- *     summary: Create payment provider
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/PaymentProviderSchema'
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.post("/payment-providers", validateBody(CreatePaymentProviderSchema), checkPaymentProviderLimit, createPaymentProvider);
-/**
- * @openapi
- * /api/v1/fundraiser/payment-providers:
- *   get:
- *     summary: Get payment providers
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.get("/payment-providers", getMyPaymentProviders);
-/**
- * @openapi
- * /api/v1/fundraiser/payment-providers/{id}:
+ * /api/v1/admin/plans/{id}:
  *   put:
- *     summary: Update payment provider
- *     tags: [Fundraiser]
+ *     summary: Update plan
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -557,7 +304,7 @@ router.get("/payment-providers", getMyPaymentProviders);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/PaymentProviderSchema'
+ *             $ref: '#/components/schemas/PlanSchema'
  *     responses:
  *       200:
  *         description: Success
@@ -584,54 +331,14 @@ router.get("/payment-providers", getMyPaymentProviders);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.put("/payment-providers/:id", validateBody(UpdatePaymentProviderSchema), updatePaymentProvider);
+router.put("/plans/:id", validateBody(updatePlanSchema), adminPlanController.updatePlan);
+
 /**
  * @openapi
- * /api/v1/fundraiser/payment-providers/{id}:
- *   delete:
- *     summary: Delete payment provider
- *     tags: [Fundraiser]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponseSchema'
- *       400:
- *         description: Bad Request
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       404:
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- *       500:
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponseSchema'
- */
-router.delete("/payment-providers/:id", deletePaymentProvider);
-/**
- * @openapi
- * /api/v1/fundraiser/payment-providers/{id}/toggle:
+ * /api/v1/admin/plans/{id}/toggle:
  *   patch:
- *     summary: Toggle payment provider
- *     tags: [Fundraiser]
+ *     summary: Toggle plan status
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -666,21 +373,17 @@ router.delete("/payment-providers/:id", deletePaymentProvider);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.patch("/payment-providers/:id/toggle", togglePaymentProvider);
+router.patch("/plans/:id/toggle", adminPlanController.togglePlanStatus);
+
+// Subscription Management
 /**
  * @openapi
- * /api/v1/fundraiser/payment-providers/{id}/default:
- *   patch:
- *     summary: Set default payment provider
- *     tags: [Fundraiser]
+ * /api/v1/admin/subscriptions:
+ *   get:
+ *     summary: Get admin subscriptions
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: Success
@@ -707,6 +410,79 @@ router.patch("/payment-providers/:id/toggle", togglePaymentProvider);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponseSchema'
  */
-router.patch("/payment-providers/:id/default", setDefaultProvider);
+router.get("/subscriptions", adminPlanController.getAllSubscriptions);
+
+/**
+ * @openapi
+ * /api/v1/admin/subscriptions/stats:
+ *   get:
+ *     summary: Get admin subscription stats
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/subscriptions/stats", adminPlanController.getSubscriptionStats);
+
+// recent donations
+/**
+ * @openapi
+ * /api/v1/admin/donations/recent:
+ *   get:
+ *     summary: Get admin recent donations
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponseSchema'
+ *       400:
+ *         description: Bad Request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponseSchema'
+ */
+router.get("/donations/recent", adminController.getRecentDonations);
 
 export default router;

@@ -73,7 +73,11 @@ class AdminPlanService {
       prisma.subscription.findMany({
         skip,
         take: limit,
-        include: {
+        select: {
+          id: true,
+          status: true,
+          currentPeriodStart: true,
+          currentPeriodEnd: true,
           plan: {
             select: { id: true, name: true, type: true, price: true }
           }

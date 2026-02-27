@@ -45,7 +45,16 @@ export const getAllSubscriptions = asyncHandler(
     const limit = parseInt(req.query.limit as string) || 20;
 
     const result = await adminPlanService.getAllSubscriptions(page, limit);
-    res.json({ success: true, data: result });
+    res.json({
+      success: true,
+      data: {
+        subscriptions: result.subscriptions,
+        total: result.pagination.total,
+        page,
+        limit,
+        totalPages: result.pagination.pages,
+      },
+    });
   },
 );
 

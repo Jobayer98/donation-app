@@ -4,6 +4,7 @@ import path from "path";
 import { requestLogger } from "./middlewares/requestLogger.middleware";
 import apiRoute from "./routes";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
+import { notFound } from "./middlewares/notFound.middleware";
 import { swaggerSpec } from "./config/swagger";
 import { metricsMiddleware, getMetrics } from "./middlewares/metrics.middleware";
 import cors from "cors";
@@ -40,6 +41,9 @@ app.get("/api/metrics", getMetrics);
 
 // Routes
 app.use("/api", apiRoute);
+
+// Not Found Handler
+app.use(notFound);
 
 // Error Handling
 app.use(errorHandler);

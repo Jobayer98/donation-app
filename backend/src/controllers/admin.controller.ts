@@ -46,7 +46,15 @@ export const adminUsers = asyncHandler(async (req, res) => {
     totalCampaigns: u.organizations.reduce((acc, org) => acc + org._count.campaigns, 0),
   }));
 
-  return res.status(200).json({ success: true, data: formattedUsers });
+  return res.status(200).json({
+    success: true, data: {
+      users: formattedUsers,
+      total: users.length,
+      page: 1,
+      limit: 10,
+      totalPages: Math.ceil(users.length / 10),
+    }
+  });
 });
 
 export const updateUserRole = asyncHandler(async (req, res) => {
@@ -73,10 +81,18 @@ export const adminOrganizations = asyncHandler(async (req, res) => {
     createdAt: org.createdAt,
   }));
 
-  return res.status(200).json({ success: true, data: formattedOrgs });
+  return res.status(200).json({
+    success: true, data: {
+      organizations: formattedOrgs,
+      total: organizations.length,
+      page: 1,
+      limit: 10,
+      totalPages: Math.ceil(organizations.length / 10),
+    }
+  });
 });
 
-export const adminRecentDonations = asyncHandler(async (req, res) => {
+export const getRecentDonations = asyncHandler(async (req, res) => {
   const { limit = 10 } = req.query;
   const donations = await adminService.getRecentDonations(Number(limit));
 
@@ -90,5 +106,13 @@ export const adminRecentDonations = asyncHandler(async (req, res) => {
     createdAt: d.createdAt,
   }));
 
-  return res.status(200).json({ success: true, data: formattedDonations });
+  return res.status(200).json({
+    success: true, message: "Recent donations", data: {
+      donations: formattedDonations,
+      total: donations.length,
+      page: 1,
+      limit: Number(limit),
+      totalPages: Math.ceil(donations.length / Number(limit)),
+    }
+  });
 });

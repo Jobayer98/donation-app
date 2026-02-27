@@ -11,11 +11,10 @@ import onboardingRoute from "./onboarding.route";
 
 // Notification & dashboard
 import notificationRoute from "./notification.route";
-import fundraiserDashboardRoute from "./fundraiser/dashboard.route";
-import adminRoute from "./admin/dashboard.route";
-
+import fundraiserDashboardRoute from "./fundraiser.route";
 // Dev-only routes
 import testRoute from "./test.route";
+import adminRoute from "./admin.route";
 
 const router = Router();
 
