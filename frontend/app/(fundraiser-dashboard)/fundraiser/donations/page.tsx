@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ArrowDownLeft, Filter, ChevronLeft, ChevronRight } from "lucide-react";
-import api from "@/lib/axios";
+import { fundraiserApi } from "@/lib/api/fundraiser";
 import { Button } from "@/components/ui/button";
 
 interface Donation {
@@ -42,7 +42,7 @@ export default function FundraiserDonationsPage() {
   const loadDonations = async (page: number) => {
     setLoading(true);
     try {
-      const res = await api.get(`/fundraiser/donations?page=${page}&limit=10`);
+      const res = await fundraiserApi.getDonations();
       const responseData = res.data.data;
       setDonations(
         Array.isArray(responseData.donations) ? responseData.donations : [],

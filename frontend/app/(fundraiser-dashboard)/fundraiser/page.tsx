@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, Users, Megaphone, Target } from "lucide-react";
 import Link from "next/link";
 import CreateCampaignModal from "@/components/fundraiser-dashboard/CreateCampaignModal";
-import api from "@/lib/axios";
+import { fundraiserApi } from "@/lib/api/fundraiser";
 
 interface OverviewStats {
   totalCampaigns: number;
@@ -69,7 +69,7 @@ export default function FundraiserOverviewPage() {
   useEffect(() => {
     const loadOverview = async () => {
       try {
-        const res = await api.get("/fundraiser/overview");
+        const res = await fundraiserApi.getOverview();
         setStats(res.data.data);
       } catch (error) {
         console.error("Failed to fetch overview:", error);
@@ -79,7 +79,7 @@ export default function FundraiserOverviewPage() {
     };
     const loadTopCampaigns = async () => {
       try {
-        const res = await api.get("/fundraiser/campaigns/top");
+        const res = await fundraiserApi.getTopCampaigns();
         setTopCampaigns(Array.isArray(res.data.data) ? res.data.data : []);
       } catch (error) {
         console.error("Failed to fetch top campaigns:", error);

@@ -1,24 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "../axios";
 
+const BASE_URL = "/v1/admin";
+
 export const adminApi = {
-  getOverview: () => api.get("/v1/admin/overview"),
+  // Overview
+  getOverview: () => api.get(`${BASE_URL}/overview`),
+
+  // Campaigns
   getCampaigns: (status?: string) =>
-    api.get("/v1/admin/campaigns", { params: { status } }),
+    api.get(`${BASE_URL}/campaigns`, { params: { status } }),
   updateCampaignStatus: (id: string, status: string) =>
-    api.patch(`/v1/admin/campaigns/${id}/status`, { status }),
-  getUsers: (page?: number, limit?: number) => api.get("/v1/admin/users", { params: { page, limit } }),
+    api.patch(`${BASE_URL}/campaigns/${id}/status`, { status }),
+
+  // Users
+  getUsers: (page?: number, limit?: number) =>
+    api.get(`${BASE_URL}/users`, { params: { page, limit } }),
   updateUserRole: (id: string, role: string) =>
-    api.patch(`/v1/admin/users/${id}/role`, { role }),
+    api.patch(`${BASE_URL}/users/${id}/role`, { role }),
+
+  // Organizations
   getOrganizations: (page?: number, limit?: number) =>
-    api.get("/v1/admin/organizations", { params: { page, limit } }),
+    api.get(`${BASE_URL}/organizations`, { params: { page, limit } }),
+
+  // Donations
   getRecentDonations: (page?: number, limit?: number) =>
-    api.get("/v1/admin/donations/recent", { params: { page, limit } }),
-  getPlans: () => api.get("/v1/admin/plans"),
-  createPlan: (data: any) => api.post("/v1/admin/plans", data),
-  updatePlan: (id: string, data: any) => api.put(`/v1/admin/plans/${id}`, data),
-  togglePlanStatus: (id: string) => api.patch(`/v1/admin/plans/${id}/toggle`),
+    api.get(`${BASE_URL}/donations/recent`, { params: { page, limit } }),
+
+  // Plans
+  getPlans: () => api.get(`${BASE_URL}/plans`),
+  createPlan: (data: any) => api.post(`${BASE_URL}/plans`, data),
+  updatePlan: (id: string, data: any) => api.put(`${BASE_URL}/plans/${id}`, data),
+  togglePlanStatus: (id: string) => api.patch(`${BASE_URL}/plans/${id}/toggle`),
+
+  // Subscriptions
   getSubscriptions: (page?: number, limit?: number) =>
-    api.get("/v1/admin/subscriptions", { params: { page, limit } }),
-  getSubscriptionStats: () => api.get("/v1/admin/subscriptions/stats"),
+    api.get(`${BASE_URL}/subscriptions`, { params: { page, limit } }),
+  getSubscriptionStats: () => api.get(`${BASE_URL}/subscriptions/stats`),
 };
