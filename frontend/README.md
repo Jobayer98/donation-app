@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SaaS Donation Platform - Frontend
 
-## Getting Started
+A modern, responsive frontend for the SaaS Donation Platform built with Next.js, enabling seamless user experiences for donors, fundraisers, and administrators.
 
-First, run the development server:
+## 🚀 Project Description
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This frontend application provides intuitive interfaces for managing donation campaigns, processing contributions, and administering the platform. It features role-based dashboards, real-time updates, and a clean UI built with shadcn/ui components.
+
+## 🛠 Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **Validation**: [Zod](https://zod.dev/)
+- **Theme**: [next-themes](https://github.com/pacocoursey/next-themes)
+
+## 📁 Project Structure
+
+```
+frontend/
+├── app/                          # Next.js App Router
+│   ├── (admin-dashboard)/       # Admin dashboard routes
+│   ├── (auth)/                  # Authentication routes
+│   ├── (donor-dashboard)/       # Donor dashboard routes
+│   └── (fundraiser-dashboard)/  # Fundraiser dashboard routes
+├── components/                   # React components
+│   ├── admin-dashboard/         # Admin-specific components
+│   ├── donor-dashboard/         # Donor-specific components
+│   ├── fundraiser-dashboard/    # Fundraiser-specific components
+│   ├── ui/                      # Reusable UI components
+│   └── ProtectedRoute.tsx       # Route protection
+└── lib/                         # Utilities and configurations
+    ├── api/                     # API client functions
+    ├── validators/              # Zod schemas
+    ├── auth.tsx                 # Authentication logic
+    └── axios.ts                 # Axios configuration
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📥 Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Node.js](https://nodejs.org/) (v20+)
+- Backend API running (see backend README)
 
-## Learn More
+### Steps
 
-To learn more about Next.js, take a look at the following resources:
+1. **Navigate to frontend directory**:
+   ```bash
+   cd donation_app/frontend
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Setup environment variables**:
+   Create a `.env` file with:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:3000
+   ```
 
-## Deploy on Vercel
+4. **Run development server**:
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Access the application**:
+   Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🎯 Features
+
+- **Role-Based Dashboards**: Separate interfaces for donors, fundraisers, and admins
+- **Authentication**: Secure login and registration with protected routes
+- **Campaign Management**: Create, edit, and monitor fundraising campaigns
+- **Donation Processing**: Seamless donation flow with multiple payment options
+- **Real-time Updates**: Live notifications and campaign progress tracking
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Dark Mode**: Theme switching support
+
+## 🔧 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+
+## 🌐 Deployment
+
+Build the application for production:
+
+```bash
+npm run build
+npm start
+```
+
+For deployment on Vercel, connect your repository and deploy with zero configuration.
