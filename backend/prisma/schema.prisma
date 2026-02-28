@@ -233,11 +233,12 @@ model Organization {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
-  owner            User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  campaigns        Campaign[]
-  paymentProviders PaymentProvider[]
-  paymentLogs      PaymentLog[]
-  subscription     Subscription?
+  owner              User                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  campaigns          Campaign[]
+  paymentProviders   PaymentProvider[]
+  paymentLogs        PaymentLog[]
+  subscription       Subscription?
+  landingPageContent LandingPageContent?
 
   @@index([ownerId])
   @@index([slug])
@@ -261,4 +262,24 @@ model Notification {
   @@index([userId, read])
   @@index([createdAt])
   @@map("notifications")
+}
+
+model LandingPageContent {
+  id                    String   @id @default(uuid(7))
+  organizationId        String   @unique @map("organization_id")
+  heroTitle             String?  @map("hero_title")
+  heroSubtitle          String?  @map("hero_subtitle")
+  heroImageUrl          String?  @map("hero_image_url")
+  featuredCampaignId    String?  @map("featured_campaign_id")
+  showActiveCampaigns   Boolean  @default(true) @map("show_active_campaigns")
+  activeCampaignsTitle  String   @default("Active Campaigns") @map("active_campaigns_title")
+  footerText            String?  @map("footer_text")
+  footerLinks           Json?    @map("footer_links")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("landing_page_contents")
 }

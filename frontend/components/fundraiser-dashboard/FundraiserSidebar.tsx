@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Building2,
+  Globe,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const menuItems = [
   { icon: Megaphone, label: "Campaigns", href: "/fundraiser/campaigns" },
   { icon: HandCoins, label: "Donations", href: "/fundraiser/donations" },
   { icon: Wallet, label: "Payouts", href: "/fundraiser/payouts" },
+  { icon: Globe, label: "Landing Page", href: "/fundraiser/landing-page" },
   { icon: Settings, label: "Settings", href: "/fundraiser/settings" },
 ];
 

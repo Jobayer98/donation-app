@@ -6,7 +6,7 @@ import organizationService from "./organization.service";
 class CampaignService {
   async create(data: createCampaignDTO, userId: string) {
     const org = await organizationService.getUserOrganization(userId);
-    
+
     if (!org) {
       throw new ApiError(404, "Organization not found. Please create an organization first.");
     }
@@ -63,7 +63,7 @@ class CampaignService {
 
   async getFundraiserOverview(userId: string) {
     const org = await organizationService.getUserOrganization(userId);
-    
+
     if (!org) {
       return { totalCampaigns: 0, activeCampaigns: 0, totalRaised: 0, totalDonors: 0 };
     }
@@ -88,7 +88,7 @@ class CampaignService {
 
   async getFundraiserCampaigns(userId: string, status?: string) {
     const org = await organizationService.getUserOrganization(userId);
-    
+
     if (!org) {
       return [];
     }
@@ -112,7 +112,7 @@ class CampaignService {
 
   async getCampaignDonations(id: string, userId: string) {
     const org = await organizationService.getUserOrganization(userId);
-    
+
     if (!org) {
       return [];
     }
@@ -138,7 +138,7 @@ class CampaignService {
 
   async getAllDonations(userId: string, page: number, limit: number) {
     const org = await organizationService.getUserOrganization(userId);
-    
+
     if (!org) {
       return {
         donations: [],
@@ -198,7 +198,7 @@ class CampaignService {
 
   async getCampaignStats(id: string, userId: string) {
     const org = await organizationService.getUserOrganization(userId);
-    
+
     if (!org) {
       return { totalRaised: 0, totalDonations: 0 };
     }

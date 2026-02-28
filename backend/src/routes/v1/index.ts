@@ -8,6 +8,7 @@ import paymentRoute from "./payment.route";
 import subscriptionRoute from "./subscription.route";
 import organizationRoute from "./organization.route";
 import onboardingRoute from "./onboarding.route";
+import landingPageRoute from "./landingPage.route";
 
 // Notification & dashboard
 import notificationRoute from "./notification.route";
@@ -26,6 +27,7 @@ router.use("/payments", paymentRoute);
 router.use("/subscriptions", subscriptionRoute);
 router.use("/organizations", organizationRoute);
 router.use("/onboarding", onboardingRoute);
+router.use("/landing-page", landingPageRoute);
 
 // Notifications and dashboards
 router.use("/notifications", notificationRoute);
